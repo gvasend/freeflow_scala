@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ivy-report.xsl"?>
+<ivy-report version="1.0">
+	<info
+		organisation="de.aktey.akka.visualmailbox"
+		module="visualization_2.12"
+		revision="1.1.1-SNAPSHOT"
+		conf="docs"
+		confs="universal, universal-docs, universal-src, windows, docker, compile, runtime, test, provided, optional, linux, rpm, debian, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool"
+		date="20180106143734"/>
+	<dependencies>
+	</dependencies>
+</ivy-report>
