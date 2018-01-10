@@ -4,7 +4,7 @@
 		module="collector_2.12"
 		revision="1.1.1-SNAPSHOT"
 		status="integration"
-		publication="20180108114421"
+		publication="20180109032437"
 	>
 		<license name="Apache License Version 2.0" url="http://www.apache.org/licenses/LICENSE-2.0" />
 		<license name="The New BSD License" url="http://www.opensource.org/licenses/bsd-license.html" />

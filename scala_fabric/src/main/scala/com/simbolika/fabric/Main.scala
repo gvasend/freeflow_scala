@@ -2,6 +2,8 @@
 
 package com.simbolika.fabric
 
+
+//import com.simbolika.neo4j
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 
 import scala.concurrent.duration._
@@ -20,9 +22,9 @@ class SFM() extends Actor {
   import context._
 
   val tasks = List("a","b","c")
-  val tasks2 = List("first","second","third")  
-  val job1: ActorRef = system.actorOf(Props(new Job("job1a",tasks)), "job1")
-  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tasks2)), "job2")
+  val this_job = Map("graph"->Map("process"->"graphit"),"section"->Map("process"->"section_doc"),"load"->Map("process"->"xml_load"))
+  val job1: ActorRef = system.actorOf(Props(new Job("job1a",this_job)), "job1")
+  val job2: ActorRef = system.actorOf(Props(new Job("job2a",this_job)), "job2")
   
   
 //This will schedule to send the Tick-message
@@ -40,12 +42,12 @@ val cancellable =
 }
 
 
-class Job(name: String, tasks: List[String]) extends Actor {
+class Job(name: String, tasks: Map[String, Map[String,String]]) extends Actor {
 
   import context._
       println("Job starting!")
-  for (task_name <- tasks) {
-    val task_ref: ActorRef = context.actorOf(Props(new Task(task_name, tasks)), task_name)
+  for (a_task <- tasks) {
+    val task_ref: ActorRef = context.actorOf(Props(new Task(tasks(a_task), tasks)), a_task)
     task_ref ! "init"
   }
 
@@ -61,7 +63,7 @@ class Job(name: String, tasks: List[String]) extends Actor {
   }
 }
 
-class Task(name: String, tasks: List[String]) extends Actor {
+class Task(name: String, tasks: Map[String, Map[String,String]]) extends Actor {
   import context._
 
   println("Task starting!")
@@ -87,24 +89,21 @@ val cancellable =
   }
 }
 
+/*
+val cache = collection.mutable.Map[String, collection.mutable.Map[String, String]]()
+val cache1 = collection.mutable.Map[String, String]()
 
-var id:Int = 0
-val imm_fruit_count = Map("apples" -> 4, "oranges" -> 5, "bananas" -> 6)
-println(imm_fruit_count("apples"))
-println(imm_fruit_count.contains("apples"))
-println(imm_fruit_count.getOrElse("melons", "peaches"))
-val mut_fruit_count = scala.collection.mutable.Map[String, Int]()
+val map1 = Map("this"->Map("this1"->"xxx"),"that"->Map("this1"->"xxx"),"other"->Map("this1"->"xxx"))
+val map2 = collection.mutable.Map(map1.toSeq: _*) 
+println("test")
 
-mut_fruit_count("apples") = 4
-mut_fruit_count += ("oranges" -> 5, "bananas" -> 6)
+//cache("test").
+cache1("this") = "abc"
+cache("test") = cache1
+println(cache("test"))
+cache("test")("this") = "xxx"
+println(map2)
 
-println(mut_fruit_count)
-
-mut_fruit_count -= "apples"
-
-mut_fruit_count.keySet
-
-mut_fruit_count.values
 
 // This is a nice feature of Scala Maps:
 val defaultMap = Map("foo" -> 1, "bar" -> 2).withDefaultValue(3)
@@ -128,3 +127,4 @@ rcv msg == "wake":
         task ! "wake"
 	
 
+*/

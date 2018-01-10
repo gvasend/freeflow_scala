@@ -1,5 +1,8 @@
 import com.typesafe.sbt.packager.docker.{Cmd, ExecCmd}
 
+val neo4j_driver = "org.neo4j.driver" % "neo4j-java-driver" % "1.0.4"
+
+
 val Versions = new {
   val akka = "2.4.12"
   val `akka-http` = "10.0.0-RC2"
@@ -100,7 +103,8 @@ lazy val visualization = project
       "de.heikoseeberger" %% "akka-sse" % "2.0.0-M4",
       "com.typesafe.akka" %% "akka-http" % Versions.`akka-http`,
       "com.typesafe.akka" %% "akka-slf4j" % Versions.akka,
-      "ch.qos.logback" % "logback-classic" % "1.1.7"
+      "ch.qos.logback" % "logback-classic" % "1.1.7",
+      "org.neo4j.driver" % "neo4j-java-driver" % "1.0.4"
     ),
 
     dockerBaseImage := "java:jre-alpine",
