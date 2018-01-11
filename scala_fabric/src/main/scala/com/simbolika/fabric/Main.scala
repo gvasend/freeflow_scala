@@ -36,7 +36,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def pred() = { 
     cache(self_id)("pred") 
   }
-  def start(sender: String) = {
+  def start(sender_ref: akka.actor.RepointableActorRef, sender: String) = {
   
  //   val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
  //   val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
@@ -157,7 +157,7 @@ val cancellable =
       println(name)
     case "start" =>
 	  println(sender.getClass())
-      tg.start(sender.path.name)
+      tg.start(sender, sender.path.name)
   }
 }
 
