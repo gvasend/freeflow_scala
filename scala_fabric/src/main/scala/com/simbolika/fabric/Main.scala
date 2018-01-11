@@ -100,7 +100,7 @@ println(s"map1 = $map1")
 
   val tg = new StaticTaskGraph(map1)
   val job1: ActorRef = system.actorOf(Props(new Job("job1a",tg)), "job1")
-  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tg)), "job2")
+//  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tg)), "job2")
   
   
 //This will schedule to send the Tick-message
