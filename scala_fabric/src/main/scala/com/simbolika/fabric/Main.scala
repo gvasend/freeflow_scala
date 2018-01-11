@@ -157,7 +157,7 @@ val cancellable =
       println(name)
     case "start" =>
 	  println(sender.getClass())
-      tg.start(sender.name)
+      tg.start(sender.path.name)
   }
 }
 
