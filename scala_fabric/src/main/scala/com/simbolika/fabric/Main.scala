@@ -36,17 +36,15 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def pred() = { 
     cache(self_id)("pred") 
   }
-  def start(sender: Repointable​Actor​Ref) = {
+  def start(sender: String) = {
   
-    val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
-    val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
-    val a = p.address // akka://<system>@<host>:<port>
-    val host = a.host // Some(<host>), where <host> is the listen address as configured for the remote system
-    val port = a.port
-	  println("sender name:", p.name)
-      println(s"start $s $p $a $host $port")
-      println(a.toString.split("/"))
-    task_complete(p.name)
+ //   val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
+ //   val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
+ //  val a = p.address // akka://<system>@<host>:<port>
+ //   val host = a.host // Some(<host>), where <host> is the listen address as configured for the remote system
+ //   val port = a.port
+	  println("sender name:", sender)
+    task_complete(sender)
     if (ready()) {
           println(s"$self_id is running")
           var lst = succ().asInstanceOf[List[String]]
@@ -159,7 +157,7 @@ val cancellable =
       println(name)
     case "start" =>
 	  println(sender.getClass())
-      tg.start(sender)
+      tg.start(sender.name)
   }
 }
 
