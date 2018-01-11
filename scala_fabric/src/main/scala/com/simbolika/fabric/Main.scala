@@ -6,7 +6,7 @@ package com.simbolika.fabric
 //import com.simbolika.neo4j
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import scala.util.{Success, Failure}
-import scala.concurrent.ExecutionContext.Implicits.global.
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.duration._
 
