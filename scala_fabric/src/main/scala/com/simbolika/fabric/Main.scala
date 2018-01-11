@@ -158,6 +158,7 @@ val cancellable =
       println("init")
       println(name)
     case "start" =>
+	  println(sender.getClass())
       tg.start(sender)
   }
 }
