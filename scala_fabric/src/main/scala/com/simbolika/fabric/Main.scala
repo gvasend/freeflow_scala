@@ -36,7 +36,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def pred() = { 
     cache(self_id)("pred") 
   }
-  def start(sender: Any) = {
+  def start(sender: Repointable​Actor​Ref) = {
   
     val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
     val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
