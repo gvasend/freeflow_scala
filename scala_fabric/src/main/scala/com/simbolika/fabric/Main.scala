@@ -99,7 +99,7 @@ val map1 = Map("step1"->Map("process"->"/home/gvasend/sk_step1","succ"->List("st
 println(s"map1 = $map1")
 
   val tg = new StaticTaskGraph(map1)
-  val job1: ActorRef = system.actorOf(Props(new Job("job1a", StaticTaskGraph(map1))), "job1")
+  val job1: ActorRef = system.actorOf(Props(new Job("job1a", new StaticTaskGraph(map1))), "job1")
 //  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tg)), "job2")
   
   
