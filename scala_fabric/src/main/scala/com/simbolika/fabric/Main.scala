@@ -138,9 +138,10 @@ class Job(name: String, tasks: StaticTaskGraph) extends Actor {
   }
 }
 
-class Task(name: String, tg: StaticTaskGraph) extends Actor {
+class Task(name: String, tg1: StaticTaskGraph) extends Actor {
   import context._
 
+  var tg = tg1
   var self_id = name
   println("Task starting!")
   println(name)
