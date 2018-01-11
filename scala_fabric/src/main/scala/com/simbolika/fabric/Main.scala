@@ -19,6 +19,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
     self_id = name 
     status(self_id) = "incomplete"
   }
+  def show() { println("show self: ",self_id) }
   def task_complete(name: String) { status(name) = "complete"}
   def task_status(name: String) = { status(name) }
   def task_pred(name: String) = { cache(name)("pred") }
@@ -117,11 +118,10 @@ val cancellable =
 }
 
 
-class Job(name: String, tasks1: StaticTaskGraph) extends Actor {
+class Job(name: String, tasks: StaticTaskGraph) extends Actor {
 
   import context._
-  val tasks = tasks1.copy()
-      println("Job starting!")
+  println("Job starting!")
   for (a_task <- tasks.get_tasks() ) {
     val task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks)), a_task)
     task_ref ! "start"
@@ -144,6 +144,7 @@ class Task(name: String, tg: StaticTaskGraph) extends Actor {
 
   println("Task starting!")
   println(name)
+  tg.show()
   tg.set_self(name)
   
 val cancellable =
