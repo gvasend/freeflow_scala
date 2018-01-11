@@ -55,7 +55,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
           { 
             if (x != "null") {
               println(s"send to $x")
-              system.actorSelection("user/" + "somename").resolveOne().onComplete {
+              ActorSystem("sentient_fabric").actorSelection("user/" + "somename").resolveOne().onComplete {
                 case Success(actorRef) => // logic with the actorRef
                 case Failure(ex) => Logger.warn("user/" + "somename" + " does not exist")}
             } 
