@@ -5,6 +5,7 @@ package com.simbolika.fabric
 
 //import com.simbolika.neo4j
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
+import scala.util.Try
 
 import scala.concurrent.duration._
 
