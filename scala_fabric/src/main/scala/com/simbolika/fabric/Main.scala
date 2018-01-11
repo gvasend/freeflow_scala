@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 
 class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   val cache = tasks
-  var state = "waiting"
+  var statev = "waiting"
   var self_id: String = "null"
   val status = collection.mutable.Map[String, String]()
   status(self_id) = "none"
@@ -48,7 +48,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
 	  println("sender name:", sender)
     task_complete(sender)
     if (ready() && state == "waiting") {
-	      state = "running"
+	      statev = "running"
           println(s"$self_id is running")
           var lst = succ().asInstanceOf[List[String]]
           lst.foreach(x => 
@@ -60,7 +60,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
                 case Failure(ex) => Logger.warn("user/" + "somename" + " does not exist")}
             } 
           })
-    state = "complete"
+    statev = "complete"
     }
   }
   def succ() = { cache(self_id)("succ") }
