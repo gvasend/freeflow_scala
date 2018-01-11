@@ -11,6 +11,7 @@ import scala.concurrent.duration._
 
 class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   val cache = tasks
+  var state = "waiting"
   var self_id: String = "null"
   val status = collection.mutable.Map[String, String]()
   status(self_id) = "none"
@@ -46,15 +47,20 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
  //   val port = a.port
 	  println("sender name:", sender)
     task_complete(sender)
-    if (ready()) {
+    if (ready() && state == "waiting") {
+	      state = "running"
           println(s"$self_id is running")
           var lst = succ().asInstanceOf[List[String]]
           lst.foreach(x => 
           { 
             if (x != "null") {
               println(s"send to $x")
-            }
+              Akka.system.actorSelection("user/" + "somename").resolveOne().onComplete {
+                case Success(actorRef) => // logic with the actorRef
+                case Failure(ex) => Logger.warn("user/" + "somename" + " does not exist")}
+            } 
           })
+    state = "complete"
     }
   }
   def succ() = { cache(self_id)("succ") }
