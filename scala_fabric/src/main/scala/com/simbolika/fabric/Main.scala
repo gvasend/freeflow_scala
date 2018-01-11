@@ -154,7 +154,7 @@ val cancellable =
       val a = p.address // akka://<system>@<host>:<port>
       val host = a.host // Some(<host>), where <host> is the listen address as configured for the remote system
       val port = a.port
-	  println(p.name)
+	  println("sender name:", p.name)
       println(s"start $s $p $a $host $port")
       println(a.toString.split("/"))
       tg.task_complete("step1")
