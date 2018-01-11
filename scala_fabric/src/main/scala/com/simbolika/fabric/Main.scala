@@ -59,6 +59,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def succ() = { cache(self_id)("succ") }
   def details() = { cache(self_id) }
   def ready() = { 
+    println(s"checking ready state for $self_id")
     var ready_state = true
     var lst = pred().asInstanceOf[List[String]]
     lst.foreach(x => 
