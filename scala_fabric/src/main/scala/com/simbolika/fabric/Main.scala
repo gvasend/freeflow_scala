@@ -117,9 +117,10 @@ val cancellable =
 }
 
 
-class Job(name: String, tasks: StaticTaskGraph) extends Actor {
+class Job(name: String, tasks1: StaticTaskGraph) extends Actor {
 
   import context._
+  val tasks = tasks1.copy()
       println("Job starting!")
   for (a_task <- tasks.get_tasks() ) {
     val task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks)), a_task)
