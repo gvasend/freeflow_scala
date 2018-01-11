@@ -58,7 +58,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
               implicit val timeout = Timeout(FiniteDuration(1, TimeUnit.SECONDS))
               ActorSystem("sentient_fabric").actorSelection("user/" + "somename").resolveOne().onComplete {
                 case Success(actorRef) => // logic with the actorRef
-                case Failure(ex) => Logger.warn("user/" + "somename" + " does not exist")}
+                case Failure(ex) => println("user/" + "somename" + " does not exist")}
             } 
           })
     statev = "complete"
