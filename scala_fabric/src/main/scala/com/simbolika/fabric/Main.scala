@@ -72,7 +72,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
       }
 //      println(s"stat = $stat")
       ready_state &= (stat == "complete") } )
-//    println("final read ", ready_state)
+    println("final read ", ready_state)
     ready_state
   } 
 }
