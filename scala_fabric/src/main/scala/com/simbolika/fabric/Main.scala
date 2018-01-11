@@ -98,7 +98,6 @@ val map1 = Map("step1"->Map("process"->"/home/gvasend/sk_step1","succ"->List("st
                "step3"->Map("process"->"sk_step3","pred"->List("step2","step1"),"succ"->List("null")))
 println(s"map1 = $map1")
 
-  val tg = new StaticTaskGraph(map1)
   val job1: ActorRef = system.actorOf(Props(new Job("job1a", new StaticTaskGraph(map1))), "job1")
 //  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tg)), "job2")
   
@@ -123,7 +122,7 @@ class Job(name: String, tasks: StaticTaskGraph) extends Actor {
   import context._
   println("Job starting!")
   for (a_task <- tasks.get_tasks() ) {
-    val task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks)), a_task)
+    val task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks.clone)), a_task)
     task_ref ! "start"
   }
 
