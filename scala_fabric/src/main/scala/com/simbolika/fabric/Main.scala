@@ -122,7 +122,7 @@ class Job(name: String, tasks: StaticTaskGraph) extends Actor {
   import context._
   println("Job starting!")
   for (a_task <- tasks.get_tasks() ) {
-    val task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks.clone)), a_task)
+    val task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks)), a_task)
     task_ref ! "start"
   }
 
@@ -141,10 +141,9 @@ class Job(name: String, tasks: StaticTaskGraph) extends Actor {
 class Task(name: String, tg: StaticTaskGraph) extends Actor {
   import context._
 
+  val self_id = name
   println("Task starting!")
   println(name)
-  tg.show()
-  tg.set_self(name)
   
 val cancellable =
   system.scheduler.schedule(
@@ -158,6 +157,7 @@ val cancellable =
       println("init")
       println(name)
     case "start" =>
+	  tg.set_self(self_id)
 	  println(sender.getClass())
       tg.start(sender.path.name)
   }
