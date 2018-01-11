@@ -36,8 +36,17 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def pred() = { 
     cache(self_id)("pred") 
   }
-  def start() = {
-    task_complete(self_id)
+  def start(sender: Any) = {
+  
+    val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
+    val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
+    val a = p.address // akka://<system>@<host>:<port>
+    val host = a.host // Some(<host>), where <host> is the listen address as configured for the remote system
+    val port = a.port
+	  println("sender name:", p.name)
+      println(s"start $s $p $a $host $port")
+      println(a.toString.split("/"))
+    task_complete(p.name)
     if (ready()) {
           println(s"$self_id is running")
           var lst = succ().asInstanceOf[List[String]]
@@ -149,25 +158,7 @@ val cancellable =
       println("init")
       println(name)
     case "start" =>
-      val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
-      val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
-      val a = p.address // akka://<system>@<host>:<port>
-      val host = a.host // Some(<host>), where <host> is the listen address as configured for the remote system
-      val port = a.port
-	  println("sender name:", p.name)
-      println(s"start $s $p $a $host $port")
-      println(a.toString.split("/"))
-      tg.task_complete("step1")
-      if (tg.ready()) {
-           println("task complete")
-      }
-      else {
-           println("task incomplete")
-      }
-      val details = tg.details()
-      println(s"executing task $details")
-      val next = tg.succ()
-      sender ! "start"
+      tg.start(sender)
   }
 }
 
