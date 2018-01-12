@@ -55,15 +55,14 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
  //   val port = a.port
 	  println("sender name:", sender)
     task_complete(sender)
-    var send_list = List("null")
+    var send_list = List()
     if (ready(self_name)) {
 	      statev = "running"
           println(s"$self_name is running")
-          send_list = task_succ(self_name).asInstanceOf[List[String]]
-          println(s"task complete, sending start to $send_list")
-    statev = "complete"
-    send_list
+		  statev = "complete"
+          return task_succ(self_name).asInstanceOf[List[String]]
     }
+	return List("null")
   }
   def succ() = { cache(self_id)("succ") }
   def details() = { cache(self_id) }
