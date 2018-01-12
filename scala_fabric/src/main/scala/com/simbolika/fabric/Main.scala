@@ -140,7 +140,7 @@ class Task(name: String, tg1: StaticTaskGraph) extends Actor {
   import context._
 
   private[this] var tg = tg1
-  private[var] var self_id = name
+  private[this] var self_id = name
   private[this] var statev = "waiting"
   println("Task starting!")
   println(name)
