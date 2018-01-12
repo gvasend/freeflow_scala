@@ -58,7 +58,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def succ() = { cache(self_id)("succ") }
   def details() = { cache(self_id) }
   def ready(self_name: String) = { 
-    println(s"checking ready state for $self_name")
+    println(s"checking ready state for $self_name state is $statev")
     var ready_state = true
     var lst = task_pred(self_name).asInstanceOf[List[String]]
     lst.foreach(x => 
@@ -141,6 +141,7 @@ class Task(name: String, tg1: StaticTaskGraph) extends Actor {
 
   var tg = tg1
   var self_id = name
+  var statev = "waiting"
   println("Task starting!")
   println(name)
   
