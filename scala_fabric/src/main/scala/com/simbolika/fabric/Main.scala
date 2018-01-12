@@ -19,11 +19,6 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   val status = collection.mutable.Map[String, String]()
   status(self_id) = "none"
 
-  def set_self(name: String) { 
-    self_id = name 
-    println(s"setting self: $self_id")
-//    status(self_id) = "incomplete"
-  }
   def show() { println("show self: ",self_id) }
   def task_complete(name: String) { status(name) = "complete"}
   def task_status(name: String) = { status(name) }
@@ -161,8 +156,8 @@ val cancellable =
       println("init")
       println(self_id)
     case "start" =>
-	  tg.set_self(self_id)
-	  println(sender.getClass())
+	  var from = sender.path.name
+	  println(s"start received by $self_id from $from, state = $statev")
       val send_list = tg.start(sender.path.name, self_id)
       send_list.foreach(x => 
       { 
