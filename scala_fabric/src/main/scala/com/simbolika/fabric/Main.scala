@@ -32,10 +32,6 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def task_details(name: String) = { cache(name) }
   def get_tasks() = { cache.keys }
   
-  def complete() { 
-    println("set task complete")
-    status(self_id) = "complete"
-  }
   def state() = { 
     println(s"id = $self_id")
     var return_status = "undefined"
@@ -56,7 +52,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
 	  println("sender name:", sender)
     task_complete(sender)
     var send_list = List()
-    if (ready(self_name)) {
+    if (ready(self_name) && statev == "waiting") {
 	      statev = "running"
           println(s"$self_name is running")
 		  statev = "complete"
