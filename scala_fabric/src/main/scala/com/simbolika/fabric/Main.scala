@@ -7,6 +7,7 @@ package com.simbolika.fabric
 import akka.actor.{Actor, ActorLogging, ActorRef, ActorSystem, Props}
 import scala.util.{Success, Failure}
 import scala.concurrent.ExecutionContext.Implicits.global
+import context._
 
 import scala.concurrent.duration._
 
@@ -37,11 +38,15 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   }
   def state() = { 
     println(s"id = $self_id")
-    status(self_id) }
+    var return_status = "undefined"
+    if (status.contains(self_id)) {
+      return_status = status(self_id)
+    }
+    return_status }
   def pred() = { 
     cache(self_id)("pred") 
   }
-  def start(sender: String, self_name: String) = {
+  def start(sender: String, self_name: String, ctx: ActorContext) = {
   
  //   val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
  //   val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
@@ -50,20 +55,14 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
  //   val port = a.port
 	  println("sender name:", sender)
     task_complete(sender)
-    if (ready(self_name) && state == "waiting") {
+    var send_list = List()
+    if (ready(self_name)) {
 	      statev = "running"
           println(s"$self_name is running")
-          var lst = succ().asInstanceOf[List[String]]
-          lst.foreach(x => 
-          { 
-            if (x != "null") {
-              println(s"send to $x")
-              ActorSystem("sentient_fabric").actorSelection("user/" + "somename").resolveOne(500 milliseconds).onComplete {
-                case Success(actorRef) => // logic with the actorRef
-                case Failure(ex) => println("user/" + "somename" + " does not exist")}
-            } 
-          })
+          send_list = task_succ(self_name).asInstanceOf[List[String]]
+          println(s"task complete, sending start to $lst")
     statev = "complete"
+    send_list
     }
   }
   def succ() = { cache(self_id)("succ") }
@@ -169,7 +168,14 @@ val cancellable =
     case "start" =>
 	  tg.set_self(self_id)
 	  println(sender.getClass())
-      tg.start(sender.path.name, self_id)
+      val send_list = tg.start(sender.path.name, self_id)
+      send_list.foreach(x => 
+      { 
+        if (x != "null") {
+          println(s"send start to $x")
+          val thePath = "/user/job1/" + x
+          ctx.actorSelection("../*") ! "start"
+          } }
   }
 }
 
