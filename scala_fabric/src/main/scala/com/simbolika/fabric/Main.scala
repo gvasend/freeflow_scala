@@ -175,8 +175,8 @@ val cancellable =
           println(s"send start to $x")
           val thePath = "/user/job1/" + x
           ctx.actorSelection("../*") ! "start"
-          } }
-  }
+          } })
+    }
 }
 
 
