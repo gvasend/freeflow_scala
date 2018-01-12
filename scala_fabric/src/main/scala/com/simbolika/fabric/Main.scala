@@ -55,7 +55,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
  //   val port = a.port
 	  println("sender name:", sender)
     task_complete(sender)
-    var send_list = List()
+    var send_list = List("null")
     if (ready(self_name)) {
 	      statev = "running"
           println(s"$self_name is running")
