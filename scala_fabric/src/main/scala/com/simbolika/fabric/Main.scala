@@ -20,7 +20,8 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
 
   def set_self(name: String) { 
     self_id = name 
-    status(self_id) = "incomplete"
+    println(s"setting self: $self_id")
+//    status(self_id) = "incomplete"
   }
   def show() { println("show self: ",self_id) }
   def task_complete(name: String) { status(name) = "complete"}
@@ -40,7 +41,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def pred() = { 
     cache(self_id)("pred") 
   }
-  def start(sender: String) = {
+  def start(sender: String, self_name: String) = {
   
  //   val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
  //   val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
@@ -49,9 +50,9 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
  //   val port = a.port
 	  println("sender name:", sender)
     task_complete(sender)
-    if (ready() && state == "waiting") {
+    if (ready(self_name) && state == "waiting") {
 	      statev = "running"
-          println(s"$self_id is running")
+          println(s"$self_name is running")
           var lst = succ().asInstanceOf[List[String]]
           lst.foreach(x => 
           { 
@@ -67,10 +68,10 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   }
   def succ() = { cache(self_id)("succ") }
   def details() = { cache(self_id) }
-  def ready() = { 
-    println(s"checking ready state for $self_id")
+  def ready(self_name: String) = { 
+    println(s"checking ready state for $self_name")
     var ready_state = true
-    var lst = pred().asInstanceOf[List[String]]
+    var lst = task_pred(self_name).asInstanceOf[List[String]]
     lst.foreach(x => 
     { 
       var stat = "incomplete"
@@ -164,11 +165,11 @@ val cancellable =
   def receive = {
     case "init" =>
       println("init")
-      println(name)
+      println(self_id)
     case "start" =>
 	  tg.set_self(self_id)
 	  println(sender.getClass())
-      tg.start(sender.path.name)
+      tg.start(sender.path.name, self_id)
   }
 }
 
