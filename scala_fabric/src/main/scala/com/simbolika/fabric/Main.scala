@@ -60,7 +60,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
 	      statev = "running"
           println(s"$self_name is running")
           send_list = task_succ(self_name).asInstanceOf[List[String]]
-          println(s"task complete, sending start to $lst")
+          println(s"task complete, sending start to $send_list")
     statev = "complete"
     send_list
     }
@@ -174,7 +174,7 @@ val cancellable =
         if (x != "null") {
           println(s"send start to $x")
           val thePath = "/user/job1/" + x
-          ctx.actorSelection("../*") ! "start"
+          context.actorSelection("../*") ! "start"
           } })
     }
 }
