@@ -46,7 +46,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def pred() = { 
     cache(self_id)("pred") 
   }
-  def start(sender: String, self_name: String) = {
+  def start(sender: String, self_name: String) = List(String) {
   
  //   val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
  //   val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
