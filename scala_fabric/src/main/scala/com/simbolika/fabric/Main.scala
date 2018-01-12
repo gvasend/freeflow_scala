@@ -120,7 +120,7 @@ class Job(name: String, tasks: StaticTaskGraph) extends Actor {
   import context._
   println("Job starting!")
   for (a_task <- tasks.get_tasks() ) {
-    val task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks)), a_task)
+    var task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks)), a_task)
     task_ref ! "start"
   }
 
