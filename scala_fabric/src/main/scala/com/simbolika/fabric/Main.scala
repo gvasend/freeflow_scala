@@ -14,7 +14,7 @@ import scala.concurrent.duration._
 
 class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   val cache = tasks
-  var statev = "waiting"
+  private[this] var statev = "waiting"
   var self_id: String = "null"
   val status = collection.mutable.Map[String, String]()
   status(self_id) = "none"
