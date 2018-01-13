@@ -11,6 +11,11 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.duration._
 
+/*
+** Key methods:
+        - start(sender,self)
+*/
+
 
 class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   private[this] val cache = tasks
@@ -19,6 +24,9 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   set_state("waiting")
   private[this] val status = collection.mutable.Map[String, String]()
   status(self_id) = "none"
+  def set_self(self_name: String) = {
+    self_id = self_name
+  }
   def display() = {
 //      println(s"???: statev $statev status $status")
   }
@@ -39,7 +47,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
       status(task_name) = next
   }
   def set_state(next: String) = {
-//      println(s"$self_id: changing self state from $statev to $next")
+      println(s"$self_id: changing self state from $statev to $next")
       statev = next
 //      if (self_id != null) {
 //        status(self_id) = statev
@@ -50,11 +58,6 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   }
   def start(sender: String, self_name: String): List[String] = {
   
- //   val s = sender    // Actor[akka://<system>@<host>:<port>/user/path/to/actor]
- //   val p = s.path    // akka://<system>@<host>:<port>/user/path/to/actor
- //  val a = p.address // akka://<system>@<host>:<port>
- //   val host = a.host // Some(<host>), where <host> is the listen address as configured for the remote system
- //   val port = a.port
     self_id = self_name
     var check_state = state()
 //	  println("sender name:", sender)
@@ -68,6 +71,25 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
           return task_succ(self_name).asInstanceOf[List[String]]
     }
 	return List("null")
+  }
+  def set_running(sender: String, self_name: String): Boolean = {
+    set_self(self_name)
+    var check_state = state()
+//	  println("sender name:", sender)
+    task_complete(sender)
+    var send_list = List()
+    if (ready(self_name) && state() == "waiting") {
+	      set_state("running")
+	      return true
+    }
+	return false
+  }
+  def set_complete(): List[String] = {
+    set_state("complete")
+    return task_succ_list()
+  }
+  def task_succ_list() = {
+    task_succ(self_id).asInstanceOf[List[String]]
   }
   def succ() = { cache(self_id)("succ") }
   def details() = { cache(self_id) }
@@ -158,7 +180,7 @@ class Task(name: String, private[this] var tg: StaticTaskGraph) extends Actor {
 //  private[this] var tg = tg1
   private[this] var self_id = name
   private[this] var statev = "waiting"
-  println(s"$name Task starting!")
+  println(s"$name Task initializing")
   tg.display()
   
 val cancellable =
@@ -179,14 +201,19 @@ val cancellable =
 	  var from = sender.path.name
       tg.task_complete(from)
 	  println(s"$self_id: start received by $self_id from $from, state = $statev")
-      val send_list = tg.start(sender.path.name, self_id)
-      send_list.foreach(x => 
-      { 
-        if (x != "null") {
-          println(s"$self_id: send start to $x")
-          val thePath = "/user/job1/" + x
-          context.actorSelection("../*") ! "start"
-          } })
+	  if (tg.set_running(sender.path.name, self_id)) {
+	      Thread.sleep(5000)
+          val send_list = tg.set_complete()
+          send_list.foreach(x => 
+          { 
+            if (x != "null") {
+              println(s"$self_id: send start to $x")
+              val thePath = "/user/job1/" + x
+              context.actorSelection("../*") ! "start"
+            } 
+          })	      
+	  }
+
     }
 }
 
