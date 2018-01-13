@@ -7,10 +7,10 @@
 		revision="1.1.1-SNAPSHOT"
 		conf="compile"
 		confs="compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool"
-		date="20180109032437"/>
+		date="20180112152951"/>
 	<dependencies>
 		<module organisation="de.aktey.akka.visualmailbox" name="collector_2.12">
-			<revision name="1.1.1-SNAPSHOT" status="integration" pubdate="20180109032437" resolver="inter-project" artresolver="inter-project" homepage="https://github.com/ouven/akka-visualmailbox/wiki" downloaded="false" searched="false" default="false" conf="compile, default(compile)" position="1">
+			<revision name="1.1.1-SNAPSHOT" status="integration" pubdate="20180112152951" resolver="inter-project" artresolver="inter-project" homepage="https://github.com/ouven/akka-visualmailbox/wiki" downloaded="false" searched="false" default="false" conf="compile, default(compile)" position="1">
 				<license name="Apache License Version 2.0" url="http://www.apache.org/licenses/LICENSE-2.0"/>
 				<license name="The New BSD License" url="http://www.opensource.org/licenses/bsd-license.html"/>
 				<metadata-artifact status="failed" details="" size="0" time="0" searched="false"/>
@@ -20,7 +20,7 @@
 			</revision>
 		</module>
 		<module organisation="de.aktey.akka.visualmailbox" name="common_2.12">
-			<revision name="1.1.1-SNAPSHOT" status="integration" pubdate="20180109032436" resolver="inter-project" artresolver="inter-project" homepage="https://github.com/ouven/akka-visualmailbox/wiki" downloaded="false" searched="false" default="false" conf="compile, default(compile)" position="2">
+			<revision name="1.1.1-SNAPSHOT" status="integration" pubdate="20180112152950" resolver="inter-project" artresolver="inter-project" homepage="https://github.com/ouven/akka-visualmailbox/wiki" downloaded="false" searched="false" default="false" conf="compile, default(compile)" position="2">
 				<license name="Apache License Version 2.0" url="http://www.apache.org/licenses/LICENSE-2.0"/>
 				<license name="The New BSD License" url="http://www.opensource.org/licenses/bsd-license.html"/>
 				<metadata-artifact status="failed" details="" size="0" time="0" searched="false"/>

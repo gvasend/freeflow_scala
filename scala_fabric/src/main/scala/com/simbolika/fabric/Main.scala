@@ -15,12 +15,15 @@ import scala.concurrent.duration._
 class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   private[this] val cache = tasks
   private[this] var statev = "waiting"
-  private[this] var self_id: String = "null"
+  private var self_id: String = "null"
+  set_state("waiting")
   private[this] val status = collection.mutable.Map[String, String]()
   status(self_id) = "none"
-
+  def display() = {
+//      println(s"???: statev $statev status $status")
+  }
   def show() { println("show self: ",self_id) }
-  def task_complete(name: String) { status(name) = "complete"}
+  def task_complete(name: String) { set_task_state(name,"complete") }
   def task_status(name: String) = { status(name) }
   def task_pred(name: String) = { cache(name)("pred") }
   def task_succ(name: String) = { cache(name)("succ") }
@@ -28,12 +31,20 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def get_tasks() = { cache.keys }
   
   def state() = { 
-    println(s"id = $self_id")
-    var return_status = "undefined"
-    if (status.contains(self_id)) {
-      return_status = status(self_id)
-    }
-    return_status }
+//    println(s"$this $self_id: self state $statev +++++++++++++++++++++++++++++++++++++++")
+    statev
+  }
+  def set_task_state(task_name: String, next: String) = {
+//      println(s"$self_id): changing state $task_name, $next")
+      status(task_name) = next
+  }
+  def set_state(next: String) = {
+//      println(s"$self_id: changing self state from $statev to $next")
+      statev = next
+//      if (self_id != null) {
+//        status(self_id) = statev
+ //     }
+  }
   def pred() = { 
     cache(self_id)("pred") 
   }
@@ -44,13 +55,16 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
  //  val a = p.address // akka://<system>@<host>:<port>
  //   val host = a.host // Some(<host>), where <host> is the listen address as configured for the remote system
  //   val port = a.port
-	  println("sender name:", sender)
+    self_id = self_name
+    var check_state = state()
+//	  println("sender name:", sender)
     task_complete(sender)
     var send_list = List()
-    if (ready(self_name) && statev == "waiting") {
-	      statev = "running"
-          println(s"$self_name is running")
-		  statev = "complete"
+    if (ready(self_name) && state() == "waiting") {
+	      set_state("running")
+	      Thread.sleep(5000)
+          println(s"$self_name: is running")
+		  set_state("complete")
           return task_succ(self_name).asInstanceOf[List[String]]
     }
 	return List("null")
@@ -58,9 +72,11 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
   def succ() = { cache(self_id)("succ") }
   def details() = { cache(self_id) }
   def ready(self_name: String) = { 
-    println(s"checking ready state for $self_name state is $statev")
+    statev = state()
+//    println(s"$self_name: checking ready state for $self_name current state is $statev")
     var ready_state = true
     var lst = task_pred(self_name).asInstanceOf[List[String]]
+//    println(s"$self_name: depends on $lst status is $status")
     lst.foreach(x => 
     { 
       var stat = "incomplete"
@@ -72,7 +88,7 @@ class StaticTaskGraph(tasks: Map[String, Map[String, Any]]) {
       }
 //      println(s"stat = $stat")
       ready_state &= (stat == "complete") } )
-    println("final read ", ready_state)
+//    println(s"$self_name: final read $ready_state")
     ready_state
   } 
 }
@@ -96,7 +112,7 @@ val map1 = Map("step1"->Map("process"->"/home/gvasend/sk_step1","succ"->List("st
                "step3"->Map("process"->"sk_step3","pred"->List("step2","step1"),"succ"->List("null")))
 println(s"map1 = $map1")
 
-  val job1: ActorRef = system.actorOf(Props(new Job("job1a", new StaticTaskGraph(map1))), "job1")
+  val job1: ActorRef = system.actorOf(Props(new Job("job1a", map1)), "job1")
 //  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tg)), "job2")
   
   
@@ -115,55 +131,59 @@ val cancellable =
 }
 
 
-class Job(name: String, tasks: StaticTaskGraph) extends Actor {
+class Job(name: String, private var map: Map[String, Map[String, Any]]) extends Actor {
 
   import context._
-  println("Job starting!")
-  for (a_task <- tasks.get_tasks() ) {
-    var task_ref: ActorRef = context.actorOf(Props(new Task(a_task, tasks)), a_task)
+  println(s"$name Job starting!")
+  for (a_task <- map.keys ) {
+    var task_ref: ActorRef = context.actorOf(Props(new Task(a_task, new StaticTaskGraph(map))), a_task)
+    Thread.sleep(5000)
     task_ref ! "start"
   }
 
   
   system.scheduler.scheduleOnce(5.seconds) {
-      println("Job heartbeat!")
-      println(name)
+      println(s"$name: Job heartbeat!")
   }
 
   def receive = {
     case "tick" => 
-      println("Job heartbeat!!")
+      println(s"$name: Job heartbeat!!")
   }
 }
 
-class Task(name: String, tg1: StaticTaskGraph) extends Actor {
+class Task(name: String, private[this] var tg: StaticTaskGraph) extends Actor {
   import context._
 
-  private[this] var tg = tg1
+//  private[this] var tg = tg1
   private[this] var self_id = name
   private[this] var statev = "waiting"
-  println("Task starting!")
-  println(name)
+  println(s"$name Task starting!")
+  tg.display()
   
 val cancellable =
   system.scheduler.schedule(
     0 milliseconds,
     5000 milliseconds,
-    context.parent,
+    self,
     "tock")
 
   def receive = {
-    case "init" =>
-      println("init")
+   case "tock" =>
+     println(s"$self_id: rcvd tock")
+     tg.display()
+   case "init" =>
+      println(s"$self_id init")
       println(self_id)
     case "start" =>
 	  var from = sender.path.name
-	  println(s"start received by $self_id from $from, state = $statev")
+      tg.task_complete(from)
+	  println(s"$self_id: start received by $self_id from $from, state = $statev")
       val send_list = tg.start(sender.path.name, self_id)
       send_list.foreach(x => 
       { 
         if (x != "null") {
-          println(s"send start to $x")
+          println(s"$self_id: send start to $x")
           val thePath = "/user/job1/" + x
           context.actorSelection("../*") ! "start"
           } })
