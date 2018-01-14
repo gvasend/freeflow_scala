@@ -66,7 +66,8 @@ lazy val commonSettings = Seq(
 
   libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-actor" % Versions.akka,
-    "com.typesafe.akka" %% "akka-cluster" % Versions.akka
+    "com.typesafe.akka" %% "akka-cluster" % Versions.akka,
+    "org.neo4j.driver" % "neo4j-java-driver" % "1.0.4"
   )
 )
 
