@@ -89,6 +89,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
     false
   }
   def format_service(tiid: Int): String = {
+    println(s"format_service: $tiid")
     val result = session.run(s"MATCH (ti:TaskInstance)-[]-(t:Task)-[]->(s:Service) WHERE id(ti) = $tiid RETURN id(s) as svc_id, s.endPoint AS endpoint")
     if (result.hasNext()) {
       val record = result.next()
