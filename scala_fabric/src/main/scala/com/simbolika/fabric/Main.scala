@@ -100,7 +100,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
       while (result1.hasNext()) {
         val record = result1.next()
         val name = record.get("name").asString()
-        val value = record.get("value").asString()
+        val value = record.get("value").asInt()
 		println("proccessing parameter: ",name,value)
          endpt += " --"+name+" "+value
       }
