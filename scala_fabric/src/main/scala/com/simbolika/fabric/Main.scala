@@ -10,7 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import org.neo4j.driver.v1._
 import scala.collection.mutable.ListBuffer
 import sys.process._
-
+import java.io.ByteArrayInputStream
 
 import scala.concurrent.duration._
 
@@ -318,6 +318,8 @@ val cancellable =
    case "init" =>
       println(s"$self_id init")
       println(self_id)
+	case Map[String, String](map) =>
+	    println("map:::",map)
     case "start" =>
 	  var from = sender.path.name
 	  println(s"$self_id: start received by $self_id from $from, state = $statev")
@@ -328,6 +330,9 @@ val cancellable =
           var successful: Boolean = false	      
 		  println(s"service: $svc_call")
           try { 
+// val inputString = "hello\nworld"
+// val is = new ByteArrayInputStream(inputString.getBytes("UTF-8"))
+// val out = (cmd #< is).lines_!
             task_output = svc_call.!!
             successful = true
             println("task output: ",task_output)
@@ -344,7 +349,7 @@ val cancellable =
                 if (x > 0) {
                   val thePath = "/user/job0/"+tg.TaskInstanceName(x)
                   println(s"$self_id: send start to $x:$thePath")
-                  context.actorSelection("../*") ! "start"
+                  context.actorSelection("../*") ! Map('name'->'start','output'->task_output)
                 } 
               })
             }
