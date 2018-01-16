@@ -318,7 +318,7 @@ val cancellable =
    case "init" =>
       println(s"$self_id init")
       println(self_id)
-	case Map[String, String](map) =>
+	case map:Map[String, String] =>
 	    println("map:::",map)
     case "start" =>
 	  var from = sender.path.name
