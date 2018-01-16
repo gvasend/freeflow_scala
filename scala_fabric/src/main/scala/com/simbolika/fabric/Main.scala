@@ -304,7 +304,8 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   var task_output: String = ""
   println(s"$tiid Task initializing")
 //  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
-  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
+  val out = ("cat" #< new File("/etc/passwd")).!!
+  println("+++",out,"+++")
 
 
 val cancellable =
