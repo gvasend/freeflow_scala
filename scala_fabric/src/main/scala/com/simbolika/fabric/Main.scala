@@ -94,6 +94,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
     if (result.hasNext()) {
       val record = result.next()
       var endpt = record.get("endpoint").asString()
+	  endpt = "python " + endpt
 	  println("found service endpoint:",endpt)
       var svc_id = record.get("svc_id").asInt()
       val result1 = session.run(s"MATCH (s:Service)-[]->(p:Parameter) WHERE id(s) = $svc_id RETURN p.name as name, p.value AS value")
@@ -325,10 +326,11 @@ val cancellable =
 	      println("service: ",tg.format_service(tiid))
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
+		  println(s"service: $svc_call")
           try { 
             task_output = svc_call.!!
             successful = true
-            println(task_output)
+            println("task output: ",task_output)
           } catch {
             case _: Exception => 
                 tg.taskError(tiid, "general error")
