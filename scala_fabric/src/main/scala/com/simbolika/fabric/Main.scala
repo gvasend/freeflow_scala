@@ -303,8 +303,7 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   var task_input: String = ""
   var task_output: String = ""
   println(s"$tiid Task initializing")
-  tg.display(tiid)
-  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
+//  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
   val contents = ("cat" #< new File("/etc/passwd")).!!
   println(contents)
 
