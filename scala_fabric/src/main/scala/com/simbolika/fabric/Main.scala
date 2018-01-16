@@ -303,7 +303,9 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   var task_output: String = ""
   println(s"$tiid Task initializing")
   tg.display(tiid)
-  
+  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
+  var output_txt = ("" #< istr).!!  
+  println("out_txt: ",output_txt)
 val cancellable =
   system.scheduler.schedule(
     0 milliseconds,
@@ -336,7 +338,7 @@ val cancellable =
 			if (input_stream == "null") {
 			    task_output = svc_call.!!
 			} else {
-               task_output = (svc_call #< is).lines_!           //  (cmd #< is).lines_!			
+               task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!			
 			}
              successful = true
             println("service output: ",task_output)
