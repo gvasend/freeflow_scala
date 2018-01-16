@@ -321,10 +321,8 @@ val cancellable =
 	case map:Map[String, String] =>
 	    println(s"$tiid: map:::",map)
 	  var input_stream = map("output")
-	  println(s"$tiid: $input_stream")
-//    case "start" =>
 	  var from = sender.path.name
-	  println(s"$self_id: start received by $self_id from $from, state = $statev")
+	  println(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
 	  if (tg.set_running(tiid)) {
 	      println(s"$tiid: task running")
 	      println("service: ",tg.format_service(tiid))
@@ -338,7 +336,7 @@ val cancellable =
 // val out = (cmd #< is).lines_!
             println(s"call service")
 			if (true) {
-			    task_output = svc_call.!!
+			    task_output = "ls -l".!!
 			} else {
                task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!			
 			}
@@ -346,6 +344,7 @@ val cancellable =
             println("service output: ",task_output)
           } catch {
             case _: Exception => 
+			    task_output = "error"
                 tg.taskError(tiid, "general error")
           }
           if (successful) {
