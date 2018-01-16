@@ -93,12 +93,14 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
     if (result.hasNext()) {
       val record = result.next()
       var endpt = record.get("endpoint").asString()
+	  println("found service endpoint:",endpt)
       var svc_id = record.get("svc_id").asInt()
       val result1 = session.run(s"MATCH (s:Service)-[]->(p:Parameter) WHERE id(s) = $svc_id RETURN p.name as name, p.value AS value")
-      while (result.hasNext()) {
+      while (result1.hasNext()) {
         val record = result.next()
         val name = record.get("name").asString()
         val value = record.get("value").asString()
+		println("proccessing parameter: ",name,value)
          endpt += " --"+name+" "+value
       }
       return endpt
