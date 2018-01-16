@@ -297,6 +297,8 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
 //  private[this] var tg = tg1
   private[this] var self_id = "deleteme"
   private[this] var statev = "waiting"
+  var task_input: String = ""
+  var task_output: String = ""
   println(s"$tiid Task initializing")
   tg.display(tiid)
   
@@ -323,9 +325,9 @@ val cancellable =
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
           try { 
-            val result = svc_call.!!
+            task_output = svc_call.!!
             successful = true
-            println(result)
+            println(task_output)
           } catch {
             case _: Exception => 
                 tg.taskError(tiid, "general error")
