@@ -349,7 +349,7 @@ val cancellable =
                 if (x > 0) {
                   val thePath = "/user/job0/"+tg.TaskInstanceName(x)
                   println(s"$self_id: send start to $x:$thePath")
-                  context.actorSelection("../*") ! Map('name'->'start','output'->task_output)
+                  context.actorSelection("../*") ! Map("name"->"start","output"->task_output)
                 } 
               })
             }
