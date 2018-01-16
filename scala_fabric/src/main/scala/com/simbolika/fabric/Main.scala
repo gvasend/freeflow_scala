@@ -11,6 +11,7 @@ import org.neo4j.driver.v1._
 import scala.collection.mutable.ListBuffer
 import sys.process._
 import java.io.ByteArrayInputStream
+import java.io.File
 
 import scala.concurrent.duration._
 
@@ -304,7 +305,8 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   println(s"$tiid Task initializing")
   tg.display(tiid)
   val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
-  var output_txt = (List("cat") #< istr).!!  
+  val contents = ("cat" #< new File("/etc/passwd")).!!
+  println(contents)
   
   println("out_txt: ",output_txt)
 val cancellable =
