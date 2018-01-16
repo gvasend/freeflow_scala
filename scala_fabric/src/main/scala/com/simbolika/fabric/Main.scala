@@ -313,32 +313,30 @@ val cancellable =
 
   def receive = {
    case "tock" =>
-     println(s"$self_id: rcvd tock")
+     println(s"$tiid: rcvd tock")
      tg.display(tiid)
    case "init" =>
-      println(s"$self_id init")
+      println(s"$tiid init")
       println(self_id)
 	case map:Map[String, String] =>
-	    println(s"$tiid: map:::",map)
+	  println(s"$tiid: map:::",map)
 	  var input_stream = map("output")
 	  var from = sender.path.name
 	  println(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
 	  if (tg.set_running(tiid)) {
 	      println(s"$tiid: task running")
-	      println("service: ",tg.format_service(tiid))
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
 		  println(s"service: $svc_call")
 		  println(s"$tiid: input: $input_stream")
           try { 
-// val inputString = "hello\nworld"
           val is = new ByteArrayInputStream(input_stream.getBytes("UTF-8"))
-// val out = (cmd #< is).lines_!
+            // val out = (cmd #< is).lines_!
             println(s"call service")
-			if (true) {
-			    task_output = "ls -l".!!
+			if (input_stream == "null") {
+			    task_output = svc_call.!!
 			} else {
-               task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!			
+               task_output = (svc_call #< is).lines_!           //  (cmd #< is).lines_!			
 			}
              successful = true
             println("service output: ",task_output)
