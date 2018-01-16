@@ -101,7 +101,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
         val value = record.get("value").asString()
          endpt += " --"+name+" "+value
       }
-      endpt
+      return endpt
     }
     "none"
   }
@@ -288,8 +288,6 @@ class JobInstance(name: String, task_graph_id: Int) extends Actor {
   
 }
 
-import java.io.FileReader
-import java.io.IOException
 
 class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   import context._
