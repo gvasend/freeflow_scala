@@ -306,9 +306,8 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
 //  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
   val out = ("cat" #< new File("/etc/passwd")).lineStream_!
   println("after command")
-  val outl = out.force.toList
-  println(outl)
-  println("after write")
+  out.foreach(println)
+  println("after print")
 
 val cancellable =
   system.scheduler.schedule(
