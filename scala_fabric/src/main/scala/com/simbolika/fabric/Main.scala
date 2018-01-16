@@ -9,6 +9,7 @@ import scala.util.{Success, Failure}
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.neo4j.driver.v1._
 import scala.collection.mutable.ListBuffer
+import sys.process._
 
 
 import scala.concurrent.duration._
@@ -304,6 +305,8 @@ val cancellable =
 	  if (tg.set_running(tiid)) {
 	      println(s"$tiid: task running")
 	      println("service: ",tg.format_service(tiid))
+          val result = "ls -al".!!
+          println(result)
 	      Thread.sleep(20000)
           val send_list = tg.set_complete(tiid)
           println("send list: ",send_list)
