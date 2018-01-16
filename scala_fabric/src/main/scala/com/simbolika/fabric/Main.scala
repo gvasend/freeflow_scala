@@ -42,7 +42,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
        val ti = record.get("tiid").asInt()
        val tname = record.get("tname").asString()
        val task_instance: ActorRef = system.actorOf(Props(new TaskInstance(ti, this)), TaskInstanceName(ti))
-       task_instance ! "start"
+       task_instance ! Map("function"->"start","output"->"null")
     }
   }
   def TaskInstancePath(tiid: Int): String = {
@@ -319,8 +319,10 @@ val cancellable =
       println(s"$self_id init")
       println(self_id)
 	case map:Map[String, String] =>
-	    println("map:::",map)
-    case "start" =>
+	    println(s"$tiid: map:::",map)
+	  var input_stream = map("output")
+	  println(s"$tiid: $input_stream")
+//    case "start" =>
 	  var from = sender.path.name
 	  println(s"$self_id: start received by $self_id from $from, state = $statev")
 	  if (tg.set_running(tiid)) {
@@ -331,9 +333,9 @@ val cancellable =
 		  println(s"service: $svc_call")
           try { 
 // val inputString = "hello\nworld"
-// val is = new ByteArrayInputStream(inputString.getBytes("UTF-8"))
+          val is = new ByteArrayInputStream(input_stream.getBytes("UTF-8"))
 // val out = (cmd #< is).lines_!
-            task_output = svc_call.!!
+            task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!
             successful = true
             println("task output: ",task_output)
           } catch {
@@ -349,7 +351,7 @@ val cancellable =
                 if (x > 0) {
                   val thePath = "/user/job0/"+tg.TaskInstanceName(x)
                   println(s"$self_id: send start to $x:$thePath")
-                  context.actorSelection("../*") ! Map("name"->"start","output"->task_output)
+                  context.actorSelection("../*") ! Map("function"->"start","output"->task_output)
                 } 
               })
             }
