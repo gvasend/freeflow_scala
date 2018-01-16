@@ -83,8 +83,8 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
     println(s"$job_id not valid")
     false
   }
-  def format_service(name: String): String = {
-    val result = session.run(s"MATCH (j:Job)-[]-(t:Task)-[]->(s:Service) WHERE id(j) = $job_id and t.name = '$name' RETURN s.endPoint AS endpoint")
+  def format_service(tiid: Int): String = {
+    val result = session.run(s"MATCH (ti:TaskInstance)-[]-(t:Task)-[]->(s:Service) WHERE id(ti) = $tiid RETURN s.endPoint AS endpoint")
     if (result.hasNext()) {
       val record = result.next()
       return record.get("endpoint").asString()
@@ -262,7 +262,6 @@ class JobInstance(name: String, task_graph_id: Int) extends Actor {
   var tg = new NeoTaskGraph(task_graph_id)
   println(tg.task_list())
   println("job id:",tg.get_job_id("job1"))
-  println("service:",tg.format_service("step2"))
   
   system.scheduler.scheduleOnce(5.seconds) {
       println(s"$name: Job heartbeat!")
@@ -304,6 +303,7 @@ val cancellable =
 	  println(s"$self_id: start received by $self_id from $from, state = $statev")
 	  if (tg.set_running(tiid)) {
 	      println(s"$tiid: task running")
+	      println("service: ",tg.format_service(tiid))
 	      Thread.sleep(20000)
           val send_list = tg.set_complete(tiid)
           println("send list: ",send_list)

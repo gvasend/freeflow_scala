@@ -18,7 +18,7 @@
 [0m[[0minfo[0m] [0mCompiling 1 Scala source to /home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/target/scala-2.12/classes...[0m
 [0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.13:component from component compiler for Scala 2.12.0[0m
 [0m[[0mdebug[0m] [0mGetting org.scala-sbt:compiler-interface:0.13.13:component from component compiler for Scala 2.12.0[0m
-[0m[[0mdebug[0m] [0mRunning cached compiler 18e149df, interfacing (CompilerInterface) with Scala compiler version 2.12.0[0m
+[0m[[0mdebug[0m] [0mRunning cached compiler 8c3a58f, interfacing (CompilerInterface) with Scala compiler version 2.12.0[0m
 [0m[[0mdebug[0m] [0mCalling Scala compiler with arguments  (CompilerInterface):[0m
 [0m[[0mdebug[0m] [0m	-deprecation[0m
 [0m[[0mdebug[0m] [0m	-feature[0m
@@ -38,16 +38,23 @@
 [0m[[33mwarn[0m] [0mby making the implicit value scala.language.postfixOps visible.[0m
 [0m[[33mwarn[0m] [0m    5000 milliseconds,[0m
 [0m[[33mwarn[0m] [0m         ^[0m
-[0m[[33mwarn[0m] [0m/home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala:290: postfix operator milliseconds should be enabled[0m
+[0m[[33mwarn[0m] [0m/home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala:289: postfix operator milliseconds should be enabled[0m
 [0m[[33mwarn[0m] [0mby making the implicit value scala.language.postfixOps visible.[0m
 [0m[[33mwarn[0m] [0m    0 milliseconds,[0m
 [0m[[33mwarn[0m] [0m      ^[0m
-[0m[[33mwarn[0m] [0m/home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala:291: postfix operator milliseconds should be enabled[0m
+[0m[[33mwarn[0m] [0m/home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala:290: postfix operator milliseconds should be enabled[0m
 [0m[[33mwarn[0m] [0mby making the implicit value scala.language.postfixOps visible.[0m
 [0m[[33mwarn[0m] [0m    5000 milliseconds,[0m
 [0m[[33mwarn[0m] [0m         ^[0m
 [0m[[33mwarn[0m] [0mfour warnings found[0m
-[0m[[0mdebug[0m] [0mScala compilation took 6.537277689 s[0m
+[0m[[0mdebug[0m] [0mScala compilation took 6.31881492 s[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidating /home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala...[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidating (transitively) by inheritance from /home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala...[0m
+[0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set(/home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] Invalidated by transitive inheritance dependency: Set(/home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala)[0m
+[0m[[0mdebug[0m] [0m[naha] The /home/gvasend/nfs/Simbolika/app/scala/ff_scala/scala_fabric/src/main/scala/com/simbolika/fabric/Main.scala source file has the following regular definitions changed:[0m
+[0m[[0mdebug[0m] [0m[naha] 	format_service.[0m
+[0m[[0mdebug[0m] [0m[naha] All member reference dependencies will be considered within this context.[0m
 [0m[[0mdebug[0m] [0m[naha] New invalidations:[0m
 [0m[[0mdebug[0m] [0m[naha] 	Set()[0m
 [0m[[0mdebug[0m] [0m[naha] Initial set of included nodes: Set()[0m
