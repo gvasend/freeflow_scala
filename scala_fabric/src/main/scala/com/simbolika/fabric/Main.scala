@@ -335,9 +335,10 @@ val cancellable =
 // val inputString = "hello\nworld"
           val is = new ByteArrayInputStream(input_stream.getBytes("UTF-8"))
 // val out = (cmd #< is).lines_!
+            println(s"call service")
             task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!
             successful = true
-            println("task output: ",task_output)
+            println("service output: ",task_output)
           } catch {
             case _: Exception => 
                 tg.taskError(tiid, "general error")
