@@ -30,11 +30,11 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
   val valid = valid_job()
   val jin = createJobInstanceNode()
   createTaskInstanceNode()
+  var sessions: Map[Int, org.neo4j.driver.v1.Session] = Map()
   private var statev = "waiting"
   private var self_id: String = "step"
   set_state("waiting")
   def createTaskInstanceNode() = {
-    val id = "id00001"
     println(s"create ti for $jin")
     val result = session.run(s"MATCH (ji:JobInstance)<-[r:HAS_JOBINSTANCE]-(j:Job)<-[:Parent]-(t:Task) where id(ji)= $jin  MERGE (t)-[rti:HAS_TASKINSTANCE]->(ti:TaskInstance {jid: id(ji), name: t.name+' instance', timestamp: $timestamp, state: 'init'}) RETURN id(ti) as tiid, t.name as tname")  
     while (result.hasNext()) {
@@ -50,6 +50,10 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
   }
   def TaskInstanceName(tiid: Int): String = {
       s"task-$tiid"
+  }
+  def taskError(tiid: Int, message: String) = {
+      println(s"task $tiid failed, message = $message")
+      val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
   def taskSession(tiid: Int): org.neo4j.driver.v1.Session = {
     val driver = GraphDatabase.driver("bolt://localhost/7687")
@@ -85,10 +89,19 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
     false
   }
   def format_service(tiid: Int): String = {
-    val result = session.run(s"MATCH (ti:TaskInstance)-[]-(t:Task)-[]->(s:Service) WHERE id(ti) = $tiid RETURN s.endPoint AS endpoint")
+    val result = session.run(s"MATCH (ti:TaskInstance)-[]-(t:Task)-[]->(s:Service) WHERE id(ti) = $tiid RETURN id(s) as svc_id, s.endPoint AS endpoint")
     if (result.hasNext()) {
       val record = result.next()
-      return record.get("endpoint").asString()
+      var endpt = record.get("endpoint").asString()
+      var svc_id = record.get("svc_id").asInt()
+      val result1 = session.run(s"MATCH (s:Service)-[]->(p:Parameter) WHERE id(s) = $svc_id RETURN p.name as name, p.value AS value")
+      while (result.hasNext()) {
+        val record = result.next()
+        val name = record.get("name").asString()
+        val value = record.get("value").asString()
+         endpt += " --"+name+" "+value
+      }
+      endpt
     }
     "none"
   }
@@ -275,6 +288,8 @@ class JobInstance(name: String, task_graph_id: Int) extends Actor {
   
 }
 
+import java.io.FileReader
+import java.io.IOException
 
 class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   import context._
@@ -305,20 +320,30 @@ val cancellable =
 	  if (tg.set_running(tiid)) {
 	      println(s"$tiid: task running")
 	      println("service: ",tg.format_service(tiid))
-          val result = "ls -al".!!
-          println(result)
-	      Thread.sleep(20000)
-          val send_list = tg.set_complete(tiid)
-          println("send list: ",send_list)
-          send_list.foreach(x => 
-          { 
-            if (x > 0) {
-              val thePath = "/user/job0/"+tg.TaskInstanceName(x)
-              println(s"$self_id: send start to $x:$thePath")
-              context.actorSelection("../*") ! "start"
-            } 
-          })	      
-	  }
+	      val svc_call = tg.format_service(tiid)
+          var successful: Boolean = false	      
+          try { 
+            val result = svc_call.!!
+            successful = true
+            println(result)
+          } catch {
+            case _: Exception => 
+                tg.taskError(tiid, "general error")
+          }
+          if (successful) {
+	          Thread.sleep(20000)
+              val send_list = tg.set_complete(tiid)
+              println("send list: ",send_list)
+              send_list.foreach(x => 
+              { 
+                if (x > 0) {
+                  val thePath = "/user/job0/"+tg.TaskInstanceName(x)
+                  println(s"$self_id: send start to $x:$thePath")
+                  context.actorSelection("../*") ! "start"
+                } 
+              })
+            }
+      }
 
     }
 }
