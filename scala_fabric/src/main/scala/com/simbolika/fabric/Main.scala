@@ -308,6 +308,7 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   println("after command")
   val outl = out.toList
   println(outl)
+  println("after write")
 
 val cancellable =
   system.scheduler.schedule(
