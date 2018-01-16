@@ -337,7 +337,7 @@ val cancellable =
           val is = new ByteArrayInputStream(input_stream.getBytes("UTF-8"))
 // val out = (cmd #< is).lines_!
             println(s"call service")
-			if (input_stream == "null") {
+			if (true) {
 			    task_output = svc_call.!!
 			} else {
                task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!			
