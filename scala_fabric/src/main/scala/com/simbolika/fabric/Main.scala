@@ -305,7 +305,7 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   println(s"$tiid Task initializing")
 //  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
   val out = ("cat" #< new File("/etc/passwd")).lineStream_!
-  println(out.mkString(" "))
+  out.foreach(println)
 
 val cancellable =
   system.scheduler.schedule(
