@@ -57,7 +57,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
       val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
   def taskSession(tiid: Int): org.neo4j.driver.v1.Session = {
-    if (sessions.contains(tiid) {
+    if (sessions.contains(tiid)) {
 	  return sessions(tiid)
 	} else {
       val driver = GraphDatabase.driver("bolt://localhost/7687")
