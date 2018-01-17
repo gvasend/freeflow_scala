@@ -222,6 +222,12 @@ object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
 
+//  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
+  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
+  println("after command",out)
+  out.foreach(println)
+  println("after print")
+  
   system.actorOf(Props(new SFM()), "root")
 }
 
@@ -229,8 +235,6 @@ object Main extends App {
 class SFM() extends Actor {
 
   import context._
-
-  retrieveRecord("Anurag")
 
 val map1 = Map("step1"->Map("process"->"/home/gvasend/sk_step1","succ"->List("step2","step3"),"pred"->List("null")),
                "step2"->Map("process"->"sk_step2","pred"->List("step1"),"succ"->List("step3")),
@@ -255,22 +259,6 @@ val cancellable =
     case "tick" => sender ! ""
   }
   
-  def retrieveRecord(name: String) : String= {
-    val driver = GraphDatabase.driver("bolt://localhost/7687")
-    val session = driver.session
-    val script = s"MATCH (a:Users) WHERE a.name = '$name' RETURN a.name AS name, a.last_name AS last_name, a.age AS age, a.city AS city"
-    val result = session.run(script)
-    val record_data = if (result.hasNext()) {
-      val record = result.next()
-      println(record.get("name").asString() + " " + record.get("last_name").asString() + " " + record.get("age").asInt() + " " + record.get("city").asString())
-      record.get("name").asString()
-    }else{
-      s"$name not found."
-    }
-    session.close()
-    driver.close()
-    record_data
-  }
 }
 
 
@@ -303,11 +291,7 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   var task_input: String = ""
   var task_output: String = ""
   println(s"$tiid Task initializing")
-//  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
-  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
-  println("after command")
-  out.foreach(println)
-  println("after print")
+
 
 val cancellable =
   system.scheduler.schedule(
