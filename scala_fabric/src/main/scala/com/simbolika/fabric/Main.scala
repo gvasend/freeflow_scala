@@ -296,7 +296,7 @@ val cancellable =
 	
   def executeProcess(cmd: String, inp: String): String = {
      var txt: String = ""
-	 println(s"execute command: $cmd")
+//	 println(s"execute command: $cmd")
      val calcProc = cmd.run(new ProcessIO(
       // Handle subprocess's stdin
       // (which we write via an OutputStream)
@@ -324,7 +324,7 @@ val cancellable =
 
     val code = calcProc.exitValue()
 	if (code != 0) {
-  	  println(s"error:$cmd:$code: $txt")
+//  	  println(s"error:$cmd:$code: $txt")
 	  throw new Exception(txt)
 	}
 	txt
