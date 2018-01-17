@@ -222,14 +222,24 @@ object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
 
-    println("before command")
+  println("before command")
   val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
 //  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
-  val out = (istr #> "python3 /home/gvasend/gv-ML-code/sk_circles.py --help").!!
+  val out = (new File("/etc/passwd") #> "python3 /home/gvasend/gv-ML-code/sk_circles.py --help").!!
 
   println("after command",out)
-//  out.foreach(println)
+
   println("after print")
+
+  val cmd = List("cat")
+  val inputString = "hello\nworld"
+
+  val is = new ByteArrayInputStream(inputString.getBytes("UTF-8"))
+
+  val out1 = (cmd #< is).lines_!
+
+  out1.foreach(println)
+  println("after after")
   
   system.actorOf(Props(new SFM()), "root")
 }
