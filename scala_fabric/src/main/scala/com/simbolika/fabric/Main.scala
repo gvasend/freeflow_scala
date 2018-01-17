@@ -325,7 +325,10 @@ val cancellable =
     // We just need to wait for it to finish.
 
     val code = calcProc.exitValue()
-	println(s"command output:$code: $txt")
+	if (code != 0) {
+  	  println(s"command output:$code: $txt")
+	  throw new Exception(txt)
+	}
 	txt
   }
 
