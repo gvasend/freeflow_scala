@@ -357,7 +357,7 @@ val cancellable =
             case ex: Exception => 
 			    task_output = "error"
 				println("upper exception")
-                tg.taskError(tiid, task_output)
+                tg.taskError(tiid, ex.getStackTraceString)
           }
           if (successful) {
               val send_list = tg.set_complete(tiid)
