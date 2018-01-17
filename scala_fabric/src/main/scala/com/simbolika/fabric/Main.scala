@@ -236,10 +236,10 @@ object Main extends App {
 
   val is = new ByteArrayInputStream(inputString.getBytes("UTF-8"))
 
-  val out1 = (cmd #< is).lineStream_!
+  val out1 = Process("cat").#<(is).!!
 
-  out1.foreach(println)
-  println("after after")
+//  out1.foreach(println)
+  println("after after",out1)
   
   system.actorOf(Props(new SFM()), "root")
 }
