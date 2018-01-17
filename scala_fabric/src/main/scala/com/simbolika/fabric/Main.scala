@@ -226,7 +226,6 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
 object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
-
  
   system.actorOf(Props(new SFM()), "root")
 }
@@ -236,12 +235,7 @@ class SFM() extends Actor {
 
   import context._
 
-val map1 = Map("step1"->Map("process"->"/home/gvasend/sk_step1","succ"->List("step2","step3"),"pred"->List("null")),
-               "step2"->Map("process"->"sk_step2","pred"->List("step1"),"succ"->List("step3")),
-               "step3"->Map("process"->"sk_step3","pred"->List("step2","step1"),"succ"->List("null")))
-println(s"map1 = $map1")
 
-//  val job0 = ActorRef = system.actorOf(Props(new Job("job0a", )), "job0")
   val job1: ActorRef = system.actorOf(Props(new JobInstance("job1a", 1934124)), "job1")
 //  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tg)), "job2")
   
@@ -317,7 +311,6 @@ val cancellable =
         val src = scala.io.Source.fromInputStream(out)
         for (line <- src.getLines()) {
 		  txt += line
-          println("Answer: " + line)
         }
         src.close()
       },
@@ -345,7 +338,7 @@ val cancellable =
       println(s"$tiid init")
       println(self_id)
 	case map:Map[String, String] =>
-	  println(s"$tiid: map:::",map)
+//	  println(s"$tiid: map:::",map)
 	  var input_stream = map("output")
 	  var from = sender.path.name
 	  println(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
@@ -353,12 +346,12 @@ val cancellable =
 	      println(s"$tiid: task running")
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
-		  println(s"service: $svc_call")
-		  println(s"$tiid: input: $input_stream")
+//		  println(s"service: $svc_call")
+//		  println(s"$tiid: input: $input_stream")
           try { 
              task_output = executeProcess(svc_call, input_stream)
              successful = true
-            println("service output: ",task_output)
+//            println("service output: ",task_output)
           } catch {
             case ex: Exception => 
 			    task_output = "error"
