@@ -52,7 +52,8 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
   def TaskInstanceName(tiid: Int): String = {
       s"task-$tiid"
   }
-  def taskError(tiid: Int, message: String) = {
+  def taskError(tiid: Int, msg: String) = {
+      val message = "task error"
       println(s"task $tiid failed, message = $message")
       val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
@@ -355,7 +356,8 @@ val cancellable =
           } catch {
             case ex: Exception => 
 			    task_output = "error"
-                tg.taskError(tiid, ex.toString)
+				println("upper exception")
+                tg.taskError(tiid, task_output)
           }
           if (successful) {
               val send_list = tg.set_complete(tiid)
