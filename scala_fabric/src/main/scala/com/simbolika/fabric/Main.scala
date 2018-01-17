@@ -231,15 +231,34 @@ object Main extends App {
 
   println("after print")
 
-  val cmd = List("cat")
-  val inputString = "hello\nworld"
+    val calcProc = "cat".run(new ProcessIO(
+      // Handle subprocess's stdin
+      // (which we write via an OutputStream)
+      in => {
+        val writer = new java.io.PrintWriter(in)
+        writer.println("1 + 2")
+        writer.println("3 + 4")
+        writer.close()
+      },
+      // Handle subprocess's stdout
+      // (which we read via an InputStream)
+      out => {
+        val src = scala.io.Source.fromInputStream(out)
+        for (line <- src.getLines()) {
+          println("Answer: " + line)
+        }
+        src.close()
+      },
+      // We don't want to use stderr, so just close it.
+      _.close()
+    ))
 
-  val is = new ByteArrayInputStream(inputString.getBytes("UTF-8"))
+    // Using ProcessBuilder.run() will automatically launch
+    // a new thread for the input/output routines passed to ProcessIO.
+    // We just need to wait for it to finish.
 
-  val out1 = Process("cat").#>(is).!!
-
-//  out1.foreach(println)
-  println("after after",out1)
+    val code = calcProc.exitValue()
+	println("exit code",code)
   
   system.actorOf(Props(new SFM()), "root")
 }
