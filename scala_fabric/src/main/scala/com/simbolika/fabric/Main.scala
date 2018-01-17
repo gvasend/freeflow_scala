@@ -62,7 +62,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
 	} else {
       val driver = GraphDatabase.driver("bolt://localhost/7687")
 	  println(driver.session)
-	  sessions(tiid) = driver.session
+//	  sessions(tiid) = driver.session
 	  return driver.session
 	} 
   }
