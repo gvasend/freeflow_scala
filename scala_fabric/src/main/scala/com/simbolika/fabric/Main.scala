@@ -57,8 +57,13 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
       val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
   def taskSession(tiid: Int): org.neo4j.driver.v1.Session = {
-    val driver = GraphDatabase.driver("bolt://localhost/7687")
-    driver.session
+    if (sessions.contains(tiid) {
+	  return sessions(tiid)
+	} else {
+      val driver = GraphDatabase.driver("bolt://localhost/7687")
+	  sessions(tiid) = driver.session
+	  return driver.session
+	} 
   }
   def createJobInstanceNode(): Int = {
     val result = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
@@ -326,7 +331,7 @@ val cancellable =
 
     val code = calcProc.exitValue()
 	if (code != 0) {
-  	  println(s"command output:$code: $txt")
+  	  println(s"error:$cmd:$code: $txt")
 	  throw new Exception(txt)
 	}
 	txt
@@ -351,17 +356,15 @@ val cancellable =
 		  println(s"service: $svc_call")
 		  println(s"$tiid: input: $input_stream")
           try { 
-            // val out = (cmd #< is).lines_!
              task_output = executeProcess(svc_call, input_stream)
              successful = true
             println("service output: ",task_output)
           } catch {
-            case _: Exception => 
+            case _: Exception(ex_txt) => 
 			    task_output = "error"
-                tg.taskError(tiid, "general error")
+                tg.taskError(tiid, ex_txt)
           }
           if (successful) {
-	          Thread.sleep(20000)
               val send_list = tg.set_complete(tiid)
               println("send list: ",send_list)
               send_list.foreach(x => 
