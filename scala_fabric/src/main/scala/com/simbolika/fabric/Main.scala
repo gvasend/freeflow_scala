@@ -52,8 +52,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
   def TaskInstanceName(tiid: Int): String = {
       s"task-$tiid"
   }
-  def taskError(tiid: Int, msg: String) = {
-      val message = "task error"
+  def taskError(tiid: Int, message: String) = {
       println(s"task $tiid failed, message = $message")
       val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
