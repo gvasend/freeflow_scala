@@ -236,7 +236,7 @@ object Main extends App {
 
   val is = new ByteArrayInputStream(inputString.getBytes("UTF-8"))
 
-  val out1 = Process("cat").#<(is).!!
+  val out1 = Process("cat").#>(is).!!
 
 //  out1.foreach(println)
   println("after after",out1)
