@@ -222,44 +222,7 @@ object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
 
-  println("before command")
-  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
-//  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
-  val out = "python3 /home/gvasend/gv-ML-code/sk_circles.py --help".!!
-
-  println("after command",out)
-
-  println("after print")
-
-    val calcProc = "cat".run(new ProcessIO(
-      // Handle subprocess's stdin
-      // (which we write via an OutputStream)
-      in => {
-        val writer = new java.io.PrintWriter(in)
-        writer.println("1 + 2")
-        writer.println("3 + 4")
-        writer.close()
-      },
-      // Handle subprocess's stdout
-      // (which we read via an InputStream)
-      out => {
-        val src = scala.io.Source.fromInputStream(out)
-        for (line <- src.getLines()) {
-          println("Answer: " + line)
-        }
-        src.close()
-      },
-      // We don't want to use stderr, so just close it.
-      _.close()
-    ))
-
-    // Using ProcessBuilder.run() will automatically launch
-    // a new thread for the input/output routines passed to ProcessIO.
-    // We just need to wait for it to finish.
-
-    val code = calcProc.exitValue()
-	println("exit code",code)
-  
+ 
   system.actorOf(Props(new SFM()), "root")
 }
 
@@ -362,7 +325,7 @@ val cancellable =
     // We just need to wait for it to finish.
 
     val code = calcProc.exitValue()
-	println(s"command output: $txt")
+	println(s"command output:$code: $txt")
 	txt
   }
 
@@ -385,16 +348,8 @@ val cancellable =
 		  println(s"service: $svc_call")
 		  println(s"$tiid: input: $input_stream")
           try { 
-          val is = new ByteArrayInputStream(input_stream.getBytes("UTF-8"))
             // val out = (cmd #< is).lines_!
-            println(s"call service")
-			if (input_stream == "null") {
-//			    task_output = svc_call.!!
-                task_output = executeProcess(svc_call, input_stream)
-			} else {
-//               task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!			
-                task_output = executeProcess(svc_call, input_stream)
-			}
+             task_output = executeProcess(svc_call, input_stream)
              successful = true
             println("service output: ",task_output)
           } catch {
