@@ -334,6 +334,7 @@ val cancellable =
 	
   def executeProcess(cmd: String, inp: String): String = {
      var txt: String = ""
+	 println(s"execute command: $cmd")
      val calcProc = cmd.run(new ProcessIO(
       // Handle subprocess's stdin
       // (which we write via an OutputStream)
@@ -361,6 +362,7 @@ val cancellable =
     // We just need to wait for it to finish.
 
     val code = calcProc.exitValue()
+	println(s"command output: $txt")
 	txt
   }
 
@@ -387,9 +389,11 @@ val cancellable =
             // val out = (cmd #< is).lines_!
             println(s"call service")
 			if (input_stream == "null") {
-			    task_output = svc_call.!!
+//			    task_output = svc_call.!!
+                task_output = executeProcess(svc_call, input_stream)
 			} else {
-               task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!			
+//               task_output = (svc_call #< is).!!           //  (cmd #< is).lines_!			
+                task_output = executeProcess(svc_call, input_stream)
 			}
              successful = true
             println("service output: ",task_output)
