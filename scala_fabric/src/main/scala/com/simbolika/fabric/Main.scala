@@ -360,9 +360,9 @@ val cancellable =
              successful = true
             println("service output: ",task_output)
           } catch {
-            case _: Exception(ex_txt) => 
+            case ex: Exception => 
 			    task_output = "error"
-                tg.taskError(tiid, ex_txt)
+                tg.taskError(tiid, ex.toString)
           }
           if (successful) {
               val send_list = tg.set_complete(tiid)
