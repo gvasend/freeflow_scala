@@ -331,6 +331,38 @@ val cancellable =
     5000 milliseconds,
     self,
     "tock")
+	
+  def executeProcess(cmd: String, inp: String): String = {
+     var txt: String = ""
+     val calcProc = cmd.run(new ProcessIO(
+      // Handle subprocess's stdin
+      // (which we write via an OutputStream)
+      in => {
+        val writer = new java.io.PrintWriter(in)
+        writer.println(inp)
+        writer.close()
+      },
+      // Handle subprocess's stdout
+      // (which we read via an InputStream)
+      out => {
+        val src = scala.io.Source.fromInputStream(out)
+        for (line <- src.getLines()) {
+		  txt += line
+          println("Answer: " + line)
+        }
+        src.close()
+      },
+      // We don't want to use stderr, so just close it.
+      _.close()
+    ))
+
+    // Using ProcessBuilder.run() will automatically launch
+    // a new thread for the input/output routines passed to ProcessIO.
+    // We just need to wait for it to finish.
+
+    val code = calcProc.exitValue()
+	txt
+  }
 
   def receive = {
    case "tock" =>
