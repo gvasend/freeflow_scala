@@ -53,7 +53,7 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
       s"task-$tiid"
   }
   def taskError(tiid: Int, message: String) = {
-      println(s"task $tiid failed, message = $message")
+//      println(s"task $tiid failed, message = $message")
       val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
   def taskSession(tiid: Int): org.neo4j.driver.v1.Session = {
