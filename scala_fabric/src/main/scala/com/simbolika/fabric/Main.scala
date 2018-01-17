@@ -31,7 +31,9 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
   val valid = valid_job()
   val jin = createJobInstanceNode()
   createTaskInstanceNode()
-  var sessions: Map[Int, org.neo4j.driver.v1.Session] = Map()
+  // org.neo4j.driver.internal.InternalSession
+//  var sessions: Map[Int, org.neo4j.driver.v1.Session] = Map()
+  var sessions: Map[Int, org.neo4j.driver.internal.InternalSession] = Map()
   private var statev = "waiting"
   private var self_id: String = "step"
   set_state("waiting")
