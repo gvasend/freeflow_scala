@@ -225,7 +225,7 @@ object Main extends App {
   println("before command")
   val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
 //  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
-  val out = (new File("/etc/passwd") #> "python3 /home/gvasend/gv-ML-code/sk_circles.py --help").!!
+  val out = "python3 /home/gvasend/gv-ML-code/sk_circles.py --help".!!
 
   println("after command",out)
 
@@ -236,7 +236,7 @@ object Main extends App {
 
   val is = new ByteArrayInputStream(inputString.getBytes("UTF-8"))
 
-  val out1 = (cmd #< is).lines_!
+  val out1 = (cmd #< is).lineStream_!
 
   out1.foreach(println)
   println("after after")
