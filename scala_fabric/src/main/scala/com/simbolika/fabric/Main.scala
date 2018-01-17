@@ -222,10 +222,13 @@ object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
 
+    println("before command")
 //  val istr = new ByteArrayInputStream("did this print?".getBytes("UTF-8"))
-  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
+//  val out = ("cat" #< new File("/etc/passwd")).lineStream_!
+  val out = ("cat" #< new File("/etc/passwd")).!!
+
   println("after command",out)
-  out.foreach(println)
+//  out.foreach(println)
   println("after print")
   
   system.actorOf(Props(new SFM()), "root")
