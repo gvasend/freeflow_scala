@@ -9,4 +9,4 @@ CREATE (job:Job {name:"test_flow"}),
     (service1)-[:parameter]->(arg12:Parameter {name: 'action', value: "fit"}),
   (task2)-[:uses_service]->(service2:Service {endPoint:'/home/gvasend/gv-ML-code/sk_train.py'}),
   (task3)-[:uses_service]->(service3:Service {endPoint:'/home/gvasend/gv-ML-code/sk_model.py'}),
-    (service3)-[:parameter]->(arg31:Parameter {name: 'n_tolerance', value: 0.11}) return id(job)
+    (service3)-[:parameter]->(arg31:Parameter {name: 'n_tolerance', value: 0.11}) return id(job) as job_instance
