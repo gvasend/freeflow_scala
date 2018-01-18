@@ -1,7 +1,7 @@
-CREATE (job:Job {name:"job1"}), 
-  (job)<-[:Parent]-(task1:Task { name:'step1' })-[:succ]->(task2:Task {name: 'step2'})-[:succ]->(task3:Task { name: 'step3' }),
-    (task1)-[:succ]->(task3)
-    (job)<-[:Parent]-(task2),
+CREATE (job:Job {name:"test_flow"}), 
+  (job)<-[:Parent]-(task1:Task { name:'step1' }),
+    (task1)-[:succ]->(task3:Task { name: 'step3' }),
+    (job)<-[:Parent]->(task2:Task { name: 'step2' }),
     (job)<-[:Parent]-(task3),
   (task1)-[:uses_service]->(service1:Service {endPoint:'/home/gvasend/gv-ML-code/sk_circles.py'}),
     (service1)-[:parameter]->(arg11:Parameter {name: 'n_samples', value: 100}),
