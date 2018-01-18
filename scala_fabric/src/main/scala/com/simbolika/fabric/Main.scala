@@ -23,7 +23,7 @@ import scala.concurrent.duration._
 class TaskGraph() {
 }
 
-class NeoTaskGraph(job_id: Int) extends TaskGraph {
+class NeoTaskGraph(job: String) extends TaskGraph {
 
   val system = ActorSystem("sentient_fabric")
   val driver = GraphDatabase.driver("bolt://localhost/7687")
@@ -67,8 +67,15 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
 	} 
   }
   def createJobInstanceNode(): Int = {
-    val result = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
-    return result.next().get("job_instance").asInt()
+    if (job contains "CREATE") {
+	  println("CREATE:",job)
+      val result = session.run(job)
+      val jid = result.next().get("job_instance").asInt()
+      val result1 = session.run(s"MATCH (j:Job) where id(j)= $jid  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
+      return result1.next().get("job_instance").asInt()
+	}
+    val result2 = session.run(s"MATCH (j:Job) where j.name= '$job'  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
+    return result2.next().get("job_instance").asInt()
   }
   def set_self(self_name: String) = {
     self_id = self_name
@@ -228,13 +235,7 @@ import scala.io.Source
 object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
- 
-  val fname = ConfigFactory.load().getString("ff.task_cypher")
-  println("cypher:",fname)
-  val text = Source.fromFile(fname).getLines.mkString
-  println("text:",text)
 
- 
   system.actorOf(Props(new SFM()), "root")
 }
 
@@ -243,9 +244,14 @@ class SFM() extends Actor {
 
   import context._
 
+   
+  val fname = ConfigFactory.load().getString("ff.task_cypher")
+  println("cypher:",fname)
+  val cypher = Source.fromFile(fname).getLines.mkString
+  println("text:",cypher)
 
-  val job1: ActorRef = system.actorOf(Props(new JobInstance("job1a", 1934124)), "job1")
-//  val job2: ActorRef = system.actorOf(Props(new Job("job2a",tg)), "job2")
+
+  val job1: ActorRef = system.actorOf(Props(new JobInstance(cypher)), "job1")
   
   
 //This will schedule to send the Tick-message
@@ -264,11 +270,12 @@ val cancellable =
 }
 
 
-class JobInstance(name: String, task_graph_id: Int) extends Actor {
+class JobInstance(task_graph: String) extends Actor {
 
   import context._
-  println(s"$name Job starting id=$task_graph_id")
-  var tg = new NeoTaskGraph(task_graph_id)
+  val name =  = self.path.name
+  println(s"$name Job starting id=$task_graph")
+  var tg = new NeoTaskGraph(task_graph)
   println(tg.task_list())
   println("job id:",tg.get_job_id("job1"))
   
