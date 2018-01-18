@@ -72,6 +72,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
 	  println("CREATE:",job)
       val result = session.run(job)
       val job_id = result.next().get("job_instance").asInt()
+	  println(s"new job: $job_id")
       val result1 = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
       return result1.next().get("job_instance").asInt()
 	}
