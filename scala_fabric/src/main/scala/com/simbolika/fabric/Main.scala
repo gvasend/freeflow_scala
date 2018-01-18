@@ -229,10 +229,11 @@ object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
  
-  val text = Source.fromFile("test_flow.txt").getLines.mkString
+  val fname = ConfigFactory.load().getString("ff.task_cypher")
+  println("cypher:",fname)
+  val text = Source.fromFile(fname).getLines.mkString
   println("text:",text)
-  val value = ConfigFactory.load().getString("my.secret.value")
-  println("config:",value)
+
  
   system.actorOf(Props(new SFM()), "root")
 }
