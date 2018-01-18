@@ -232,7 +232,7 @@ object Main extends App {
   val text = Source.fromFile("test_flow.txt").getLines.mkString
   println("text:",text)
   val value = ConfigFactory.load().getString("my.secret.value")
-  print("config:",value)
+  println("config:",value)
  
   system.actorOf(Props(new SFM()), "root")
 }
