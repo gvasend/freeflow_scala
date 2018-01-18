@@ -304,7 +304,10 @@ val cancellable =
 	}
   
   def wrapJson(inp: String): String = {
-    "<app_data>{"+inp+"\"_terminator\":\"null\"}</app_data>"
+    if (inp != "null") {
+      return "<app_data>{"+inp+"\"_terminator\":\"null\"}</app_data>"
+	}
+	return inp
   }
 	
   def executeProcess(cmd: String, inp: String): String = {
