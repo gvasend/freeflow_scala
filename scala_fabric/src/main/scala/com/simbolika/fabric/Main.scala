@@ -227,6 +227,9 @@ object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
  
+  val text = io.Source.fromInputStream(getClass.getResourceAsStream("file.xml")).mkString
+  println("text:",text)
+ 
   system.actorOf(Props(new SFM()), "root")
 }
 
