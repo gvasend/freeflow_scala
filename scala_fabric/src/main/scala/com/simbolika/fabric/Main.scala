@@ -93,13 +93,13 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     return -1
   }
   def valid_job(): Boolean = {
-    val result = session.run(s"MATCH (j:Job) WHERE id(j) = $job_id RETURN j.name AS job")
+    val result = session.run(s"MATCH (j:Job) WHERE id(j) = $job RETURN j.name AS job")
     if (result.hasNext()) {
       val record = result.next()
       println(record.get("job").asString())
       return true
     }
-    println(s"$job_id not valid")
+    println(s"$job not valid")
     false
   }
   def format_service(tiid: Int): String = {
