@@ -362,7 +362,7 @@ val cancellable =
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
 //		  println(s"service: $svc_call")
-//		  println(s"$tiid: input: $input_stream")
+		  println(s"$tiid: input: $input_stream")
           try { 
              task_output = executeProcess(svc_call, input_stream)
              successful = true
