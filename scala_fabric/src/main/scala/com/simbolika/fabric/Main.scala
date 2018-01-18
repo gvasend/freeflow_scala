@@ -273,7 +273,7 @@ val cancellable =
 class JobInstance(task_graph: String) extends Actor {
 
   import context._
-  val name =  = self.path.name
+  val name = self.path.name
   println(s"$name Job starting id=$task_graph")
   var tg = new NeoTaskGraph(task_graph)
   println(tg.task_list())
