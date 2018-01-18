@@ -5,8 +5,8 @@ CREATE (job:Job {name:"test_flow"}),
     (task2)-[:succ]->(task3),
     (job)<-[:Parent]-(task3),
   (task1)-[:uses_service]->(service1:Service {endPoint:'/home/gvasend/gv-ML-code/sk_circles.py'}),
-    (service1)-[:parameter]->(arg11:Parameter {name: 'n_samples', value: "100"}),
-    (service1)-[:parameter]->(arg12:Parameter {name: 'action', value: "fit"}),
-  (task2)-[:uses_service]->(service2:Service {endPoint:'/home/gvasend/gv-ML-code/sk_train.py'}),
+    (service1)-[:parameter]->(arg12:Parameter {name: 'n_samples', value: "100"}),
+  (task2)-[:uses_service]->(service2:Service {endPoint:'/home/gvasend/gv-ML-code/sk_svc.py'}),
   (task3)-[:uses_service]->(service3:Service {endPoint:'/home/gvasend/gv-ML-code/sk_model.py'}),
-    (service3)-[:parameter]->(arg31:Parameter {name: 'n_tolerance', value: 0.11}) return id(job) as job_instance
+    (service3)-[:parameter]->(arg31:Parameter {name: 'plot', value: "False"})
+    (service3)-[:parameter]->(arg11:Parameter {name: 'action', value: "fit"}) return id(job) as job_instance
