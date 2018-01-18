@@ -29,7 +29,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
   val driver = GraphDatabase.driver("bolt://localhost/7687")
   val session = driver.session
   val timestamp: Long = System.currentTimeMillis / 1000
-  val valid = valid_job()
+//  val valid = valid_job()
   val jin = createJobInstanceNode()
   createTaskInstanceNode()
   var sessions = scala.collection.mutable.Map[Int, org.neo4j.driver.v1.Session]()
