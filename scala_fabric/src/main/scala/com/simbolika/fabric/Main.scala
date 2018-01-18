@@ -295,7 +295,10 @@ val cancellable =
     "tock")
 	
   def extractJson(inp: String): String = {
-      var strout = inp.split("<app_data>{")(1).split("}</app_data>")(0) + ","
+      var strout = inp
+      if (inp != "null") {
+        strout = inp.split("<app_data>\\{")(1).split("\\}</app_data>")(0) + ","
+	  }
       println(s"strout: $strout")
 	  strout
 	}
