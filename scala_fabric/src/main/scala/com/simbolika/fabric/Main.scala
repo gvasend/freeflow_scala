@@ -12,6 +12,7 @@ import scala.collection.mutable.ListBuffer
 import sys.process._
 import java.io.ByteArrayInputStream
 import java.io.File
+import com.typesafe.config.ConfigFactory
 
 import scala.concurrent.duration._
 
@@ -230,6 +231,7 @@ object Main extends App {
  
   val text = Source.fromFile("test_flow.txt").getLines.mkString
   println("text:",text)
+  val value = ConfigFactory.load().getString("my.secret.value")
  
   system.actorOf(Props(new SFM()), "root")
 }
