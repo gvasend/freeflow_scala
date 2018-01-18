@@ -222,12 +222,13 @@ class NeoTaskGraph(job_id: Int) extends TaskGraph {
   } 
 }
 
+import scala.io.Source
 
 object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
  
-  val text = io.Source.fromInputStream(getClass.getResourceAsStream("file.xml")).mkString
+  val text = Source.fromFile(filename).getLines.mkString
   println("text:",text)
  
   system.actorOf(Props(new SFM()), "root")
