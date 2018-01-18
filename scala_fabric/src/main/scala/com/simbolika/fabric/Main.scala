@@ -228,7 +228,7 @@ object Main extends App {
 
   val system = ActorSystem("sentient_fabric")
  
-  val text = Source.fromFile(filename).getLines.mkString
+  val text = Source.fromFile("test_flow.txt").getLines.mkString
   println("text:",text)
  
   system.actorOf(Props(new SFM()), "root")
