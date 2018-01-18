@@ -29,6 +29,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
   val driver = GraphDatabase.driver("bolt://localhost/7687")
   val session = driver.session
   val timestamp: Long = System.currentTimeMillis / 1000
+  var job_id = 0
 //  val valid = valid_job()
   val jin = createJobInstanceNode()
   createTaskInstanceNode()
@@ -70,8 +71,8 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     if (job contains "CREATE") {
 	  println("CREATE:",job)
       val result = session.run(job)
-      val jid = result.next().get("job_instance").asInt()
-      val result1 = session.run(s"MATCH (j:Job) where id(j)= $jid  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
+      val job_id = result.next().get("job_instance").asInt()
+      val result1 = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
       return result1.next().get("job_instance").asInt()
 	}
     val result2 = session.run(s"MATCH (j:Job) where j.name= '$job'  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
