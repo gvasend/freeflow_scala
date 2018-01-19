@@ -352,13 +352,8 @@ val cancellable =
         src.close()
       },
       // We don't want to use stderr, so just close it
-      err => {
-        val src = scala.io.Source.fromInputStream(err)
-        for (line <- src.getLines()) {
-		  err_txt += line
-        }
-        src.close()
-      }
+      stderr => { err_txt = convertStreamToString(stderr)
+                  stderr.close() }
     ))
 
     // Using ProcessBuilder.run() will automatically launch
