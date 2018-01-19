@@ -373,7 +373,10 @@ val cancellable =
 	case map:Map[String, String] =>
 //	  println(s"$tiid: map:::",map)
 	  var input_stream = extractJson(map("output"))
+      println(s"cum input before $task_input")
+	  println(s"input before $input_stream")
 	  task_input += input_stream						// concatenate all pred task output
+	  println(s"cum after $task_input")
 	  var from = sender.path.name
 	  println(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
 	  if (tg.set_running(tiid)) {
