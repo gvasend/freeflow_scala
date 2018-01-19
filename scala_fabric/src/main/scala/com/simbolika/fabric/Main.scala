@@ -380,7 +380,7 @@ val cancellable =
 	  var from = sender.path.name
 	  println(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
 	  if (tg.set_running(tiid)) {
-	      input_stream = wrapJson(input_stream)
+	      input_stream = wrapJson(task_input)
 	      println(s"$tiid: task running")
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
