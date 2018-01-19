@@ -352,7 +352,7 @@ val cancellable =
         src.close()
       },
       // We don't want to use stderr, so just close it
-      stderr => { err_txt = convertStreamToString(stderr)
+      stderr => { err_txt = scala.io.Source.fromInputStream(stderr).mkString
                   stderr.close() }
     ))
 
