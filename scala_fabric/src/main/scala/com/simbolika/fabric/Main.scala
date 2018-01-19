@@ -45,7 +45,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
        val ti = record.get("tiid").asInt()
        val tname = record.get("tname").asString()
        val task_instance: ActorRef = system.actorOf(Props(new TaskInstance(ti, this)), TaskInstanceName(ti))
-       task_instance ! Map("function"->"start","output"->"null")
+       task_instance ! Map("function"->"start","output"->"")
     }
   }
   def TaskInstancePath(tiid: Int): String = {
