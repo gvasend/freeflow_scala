@@ -332,7 +332,7 @@ val cancellable =
 	
   def executeProcess(cmd: String, inp: String): String = {
      var txt: String = ""
-     var err_txt String = ""
+     var err_txt: String = ""
 	 println(s"execute command: $cmd")
      val calcProc = cmd.run(new ProcessIO(
       // Handle subprocess's stdin
