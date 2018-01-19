@@ -332,6 +332,7 @@ val cancellable =
 	
   def executeProcess(cmd: String, inp: String): String = {
      var txt: String = ""
+     var err_txt String = ""
 	 println(s"execute command: $cmd")
      val calcProc = cmd.run(new ProcessIO(
       // Handle subprocess's stdin
@@ -354,7 +355,7 @@ val cancellable =
       err => {
         val src = scala.io.Source.fromInputStream(err)
         for (line <- src.getLines()) {
-		  println(line)
+		  err_txt += line
         }
         src.close()
       }
@@ -366,7 +367,7 @@ val cancellable =
 
     val code = calcProc.exitValue()
 	if (code != 0) {
-//  	  println(s"error:$cmd:$code: $txt")
+  	  println(s"error:$cmd:$code:$err_txt: $txt")
 	  throw new Exception(txt)
 	}
 	txt
