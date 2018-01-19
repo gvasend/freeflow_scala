@@ -313,9 +313,12 @@ val cancellable =
 	
   def extractJson(inp: String): String = {
       var strout = inp
-      if (inp != "null") {
+      if (inp != "null" && inp != "") {
         strout = inp.split("<app_data>\\{")(1).split("\\}</app_data>")(0) + ","
 	  }
+       else {
+	  strout = ""
+       }
       println(s"strout: $strout")
 	  strout
 	}
