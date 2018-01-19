@@ -357,6 +357,7 @@ val cancellable =
 		  println(line)
         }
         src.close()
+      }
     ))
 
     // Using ProcessBuilder.run() will automatically launch
