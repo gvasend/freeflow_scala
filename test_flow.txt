@@ -7,6 +7,6 @@ CREATE (job:Job {name:"test_flow"}),
   (task1)-[:uses_service]->(service1:Service {endPoint:'/home/gvasend/gv-ML-code/sk_circles.py'}),
     (service1)-[:parameter]->(arg12:Parameter {name: 'n_samples', value: "100"}),
   (task2)-[:uses_service]->(service2:Service {endPoint:'/home/gvasend/gv-ML-code/sk_svc.py'}),
-  (task3)-[:uses_service]->(service3:Service {endPoint:'/home/gvasend/gv-ML-code/sk_model.py'}),
+  (task3)-[:uses_service]->(service3:Service {endPoint:'/home/gvasend/gv-ML-code/sk_model.py -ll INFO'}),
     (service3)-[:parameter]->(arg31:Parameter {name: 'plot', value: "no"}),
     (service3)-[:parameter]->(arg11:Parameter {name: 'action', value: "fit"}) return id(job) as job_instance
