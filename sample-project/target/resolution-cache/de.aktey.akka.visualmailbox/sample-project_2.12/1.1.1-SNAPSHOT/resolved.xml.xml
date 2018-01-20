@@ -4,7 +4,7 @@
 		module="sample-project_2.12"
 		revision="1.1.1-SNAPSHOT"
 		status="integration"
-		publication="20180106143425"
+		publication="20180119023403"
 	>
 		<license name="Apache License Version 2.0" url="http://www.apache.org/licenses/LICENSE-2.0" />
 		<license name="The New BSD License" url="http://www.opensource.org/licenses/bsd-license.html" />
@@ -34,5 +34,7 @@
 		<dependency org="org.scala-lang" name="scala-library" rev="2.12.0" conf="scala-tool->default,optional(default);compile->default(compile)"/>
 		<dependency org="de.aktey.akka.visualmailbox" name="collector_2.12" rev="1.1.1-SNAPSHOT" conf="compile->default(compile)"/>
 		<dependency org="com.typesafe.akka" name="akka-actor_2.12" rev="2.4.12" conf="compile->default(compile)"/>
+		<dependency org="com.typesafe.akka" name="akka-cluster_2.12" rev="2.4.12" conf="compile->default(compile)"/>
+		<dependency org="org.neo4j.driver" name="neo4j-java-driver" rev="1.0.4" conf="compile->default(compile)"/>
 	</dependencies>
 </ivy-module>
