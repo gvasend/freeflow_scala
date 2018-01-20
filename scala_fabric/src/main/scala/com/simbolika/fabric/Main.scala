@@ -248,9 +248,11 @@ class SFM() extends Actor {
 
    
   val fname = ConfigFactory.load().getString("ff.task_cypher")
+  val ff_home =  ConfigFactory.load().getString("ff.ff_home")
   println("cypher:",fname)
   val cypher = Source.fromFile(fname).getLines.mkString
-  println("text:",cypher)
+  val cypher1 = cypher.replace('$ff_home',ff_home)
+  println("text:",cypher1)
 
 
   val job1: ActorRef = system.actorOf(Props(new JobInstance(cypher)), "job1")
