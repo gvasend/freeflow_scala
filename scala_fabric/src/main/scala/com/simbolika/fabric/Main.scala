@@ -346,6 +346,24 @@ val cancellable =
 	}
 	return inp
   }
+  
+  def processLine(line: String): String = {
+  println("rcvd:",line)
+  if (line contains "create_job") {
+   var lst = line.split("::")
+   var cypher = lst(1)
+   println("execute ",cypher)
+   var job: ActorRef = system.actorOf(Props(new JobInstance(cypher)), "job2")
+ 
+  }
+  else if (line contains "run_job") {
+   var lst = line.split("::")
+   var jname = lst(1)
+   var job: ActorRef = system.actorOf(Props(new JobInstance(line)), "job2")
+  }
+  else if (line contains "rcv_data") {}
+  line
+}
 	
   def executeProcess(cmd: String, inp: String): String = {
      var txt: String = ""
@@ -364,7 +382,7 @@ val cancellable =
       out => {
         val src = scala.io.Source.fromInputStream(out)
         for (line <- src.getLines()) {
-		  txt += line
+		  txt += processLine(line)
         }
         src.close()
       },
