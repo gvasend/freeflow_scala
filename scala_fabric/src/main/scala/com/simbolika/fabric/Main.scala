@@ -78,6 +78,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
       val result1 = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
       return result1.next().get("job_instance").asInt()
 	}
+	tg_log(s"lookup job by name: $job")
     val result2 = session.run(s"MATCH (j:Job) where j.name= '$job'  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
     return result2.next().get("job_instance").asInt()
   }
@@ -359,7 +360,7 @@ val cancellable =
   else if (line contains "run_job") {
    var lst = line.split("::")
    var jname = lst(1)
-   var job: ActorRef = system.actorOf(Props(new JobInstance(line)), "job2")
+   var job: ActorRef = system.actorOf(Props(new JobInstance(jname)), "job2")
   }
   else if (line contains "rcv_data") {}
   line
