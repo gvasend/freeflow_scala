@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream
 import java.io.File
 import com.typesafe.config.ConfigFactory
 
+
 import scala.concurrent.duration._
 
 /*
@@ -26,6 +27,7 @@ class TaskGraph() {
 class NeoTaskGraph(job: String) extends TaskGraph {
 
   val system = ActorSystem("sentient_fabric")
+  val log = system.log
   val driver = GraphDatabase.driver("bolt://localhost/7687")
   val session = driver.session
   val timestamp: Long = System.currentTimeMillis / 1000
@@ -38,7 +40,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
   private var self_id: String = "step"
   set_state("waiting")
   def createTaskInstanceNode() = {
-    println(s"create ti for $jin")
+    tg_log(s"create ti for $jin")
     val result = session.run(s"MATCH (ji:JobInstance)<-[r:HAS_JOBINSTANCE]-(j:Job)<-[:Parent]-(t:Task) where id(ji)= $jin  MERGE (t)-[rti:HAS_TASKINSTANCE]->(ti:TaskInstance {jid: id(ji), name: t.name+' instance', timestamp: $timestamp, state: 'init'}) RETURN id(ti) as tiid, t.name as tname")  
     while (result.hasNext()) {
       val record = result.next()
@@ -55,7 +57,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
       s"task-$tiid"
   }
   def taskError(tiid: Int, message: String) = {
-      println(s"task $tiid failed, message = $message")
+      tg_log(s"task $tiid failed, message = $message")
       val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
   def taskSession(tiid: Int): org.neo4j.driver.v1.Session = {
@@ -69,10 +71,10 @@ class NeoTaskGraph(job: String) extends TaskGraph {
   }
   def createJobInstanceNode(): Int = {
     if (job contains "CREATE") {
-	  println("CREATE:",job)
+	  tg_log(s"CREATE: $job")
       val result = session.run(job)
       val job_id = result.next().get("job_instance").asInt()
-	  println(s"new job: $job_id")
+	  tg_log(s"new job: $job_id")
       val result1 = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
       return result1.next().get("job_instance").asInt()
 	}
@@ -98,10 +100,10 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     val result = session.run(s"MATCH (j:Job) WHERE id(j) = $job RETURN j.name AS job")
     if (result.hasNext()) {
       val record = result.next()
-      println(record.get("job").asString())
+      tg_log(record.get("job").asString())
       return true
     }
-    println(s"$job not valid")
+    tg_log(s"$job not valid")
     false
   }
   def format_service(tiid: Int): String = {
@@ -111,14 +113,14 @@ class NeoTaskGraph(job: String) extends TaskGraph {
       val record = result.next()
       var endpt = record.get("endpoint").asString()
 	  endpt = "python3 " + endpt
-	  println("found service endpoint:",endpt)
+	  tg_log(s"found service endpoint: $endpt")
       var svc_id = record.get("svc_id").asInt()
       val result1 = taskSession(tiid).run(s"MATCH (s:Service)-[]->(p:Parameter) WHERE id(s) = $svc_id RETURN p.name as name, p.value AS value")
       while (result1.hasNext()) {
         val record = result1.next()
         val name = record.get("name").asString()
         val value = record.get("value").asString()
-		println("proccessing parameter: ",name,value)
+		tg_log(s"proccessing parameter: $name $value")
          endpt += " --"+name+" "+value
       }
       return endpt
@@ -126,7 +128,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     "none"
   }
   def task_succ_list(tiid: Int): List[Int] = { 
-    println(s"succ for $tiid")
+    tg_log(s"succ for $tiid")
     val tsession = taskSession(tiid)
     val result = tsession.run(s"MATCH (ti1:TaskInstance)-[]-(t1:Task)<-[]-(t2:Task)-[]-(ti2:TaskInstance) WHERE id(ti2) = $tiid and ti1.timestamp=ti2.timestamp RETURN id(ti1) AS tid")
     var tasks = new ListBuffer[Int]()
@@ -137,7 +139,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     return tasks.toList
   }
   def task_pred_list(tiid: Int): List[Int] = {
-    println("pred")
+    tg_log("pred")
     val tsession = taskSession(tiid)
     val result = session.run(s"MATCH (ti1:TaskInstance)-[]-(t1:Task)-[]->(t2:Task)-[]-(ti2:TaskInstance) WHERE id(ti2) = $tiid and ti1.timestamp=ti2.timestamp RETURN id(ti1) AS tid")
     var tasks = new ListBuffer[Int]()
@@ -159,13 +161,17 @@ class NeoTaskGraph(job: String) extends TaskGraph {
   }
   def display(tiid: Int): Boolean = {
     val tsession = taskSession(tiid)
-    val result = tsession.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid RETURN ti.state AS state")
+    val result = tsession.run(s"MATCH (ti:TaskInstance) OPTIONAL MATCH (ti)-[]-(t:Task)-[]-(s:Service)-[]-(arg:Parameter) WHERE id(ti) = $tiid RETURN arg as arg, ti.state AS state")
     while (result.hasNext()) {
+      val ks = result.keys()
+      tg_log(s"keys: $ks")
       val record = result.next()
-        println("ti: ",record.get("state").asString())
+        val ti_state = record.get("state").asString()
+        tg_log(s"ti: $ti_state")
+        
         return true
     }
-    println("ti not found")
+    tg_log("ti not found")
     return false
   }
   def show() { println("show self: ",self_id) }
@@ -176,7 +182,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     val result = session.run(script)
     if (result.hasNext()) {
       val record = result.next()
-      println(record.get("name").asString())
+      tg_log(record.get("name").asString())
       return List("x")
     }
     List("none")
@@ -192,7 +198,7 @@ class NeoTaskGraph(job: String) extends TaskGraph {
   def set_task_state(task_name: String, next: String) = { }
   
   def set_state(next: String) = {
-      println(s"$self_id: changing self state from $statev to $next")
+      tg_log(s"$self_id: changing self state from $statev to $next")
       statev = next
 //      if (self_id != null) {
 //        status(self_id) = statev
@@ -206,23 +212,23 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     val result0 = tsession.run(s"MATCH (ti1:TaskInstance) WHERE id(ti1) = $tiid and ti1.state = 'init' RETURN id(ti1) AS task_id, ti1.state as state")
     if (result0.hasNext()) {
       val record = result0.next()
-      println("ti status:",record.get("task_id").asInt(),record.get("state").asString())
+//      tg_log("ti status:",record.get("task_id").asInt(),record.get("state").asString())
     } else {
       return false
     }
     val result = tsession.run(s"MATCH (ti1:TaskInstance)-[]-(t1:Task)<-[:succ]-(t2:Task)-[]-(ti2:TaskInstance) WHERE id(ti1) = $tiid and ti1.timestamp=ti2.timestamp and ti2.state <> 'complete' RETURN id(ti2) AS waiting, ti2.state as state")
     if (result.hasNext()) {
       val record = result.next()
-      println("waiting on:",record.get("waiting").asInt(),record.get("state").asString())
+//      tg_log("waiting on:",record.get("waiting").asInt(),record.get("state").asString())
       return false
     }
-    println(s"task can run")
+    tg_log(s"task can run")
     val result1 = tsession.run(s"MATCH (ti1:TaskInstance) WHERE id(ti1) = $tiid SET ti1.state='running' ")
 	true
   }
   def set_complete(tiid: Int): List[Int] = {
     val tsession = taskSession(tiid)
-    println(s"mark task as complete $tiid")
+    tg_log(s"mark task as complete $tiid")
     val result = tsession.run(s"MATCH (ti1:TaskInstance) WHERE id(ti1) = $tiid SET ti1.state='complete' ")
     return task_succ_list(tiid)
   }
@@ -230,11 +236,15 @@ class NeoTaskGraph(job: String) extends TaskGraph {
   def details() = { }
   def ready(self_name: String) = { 
   } 
+  def tg_log(txt: String) = {
+     log.info(txt)
+  }
 }
 
 import scala.io.Source
 
 object Main extends App {
+
 
   val system = ActorSystem("sentient_fabric")
 
@@ -242,20 +252,24 @@ object Main extends App {
 }
 
 
-class SFM() extends Actor {
+class SFM() extends Actor with akka.actor.ActorLogging {
 
   import context._
+  import akka.event.Logging
+  import akka.event.LoggingAdapter
 
+//  var log = Logging.getLogger(getContext().system(), this)
+  log.info("logger test")
    
-  val fname = ConfigFactory.load().getString("ff.task_cypher")
+  val fname = ConfigFactory.load().getString("ff.job")
   val ff_home =  ConfigFactory.load().getString("ff.ff_home")
-  println("cypher:",fname)
+  log.info("cypher: $fname")
   val cypher = Source.fromFile(fname).getLines.mkString
-  val cypher1 = cypher.replace('$ff_home',ff_home)
-  println("text:",cypher1)
+  val cypher1 = cypher.replace("$ff_home",ff_home)
+  log.info(s"text: $cypher1")
 
 
-  val job1: ActorRef = system.actorOf(Props(new JobInstance(cypher)), "job1")
+  val job1: ActorRef = system.actorOf(Props(new JobInstance(cypher1)), "job1")
   
   
 //This will schedule to send the Tick-message
@@ -274,14 +288,14 @@ val cancellable =
 }
 
 
-class JobInstance(task_graph: String) extends Actor {
+class JobInstance(task_graph: String) extends Actor with akka.actor.ActorLogging {
 
   import context._
   val name = self.path.name
-  println(s"$name Job starting id=$task_graph")
+  log.info(s"$name Job starting id=$task_graph")
   var tg = new NeoTaskGraph(task_graph)
-  println(tg.task_list())
-  println("job id:",tg.get_job_id("job1"))
+//  log.info(tg.task_list())
+  log.info("job id:",tg.get_job_id("job1"))
   
   system.scheduler.scheduleOnce(5.seconds) {
       println(s"$name: Job heartbeat!")
@@ -295,7 +309,7 @@ class JobInstance(task_graph: String) extends Actor {
 }
 
 
-class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
+class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor with akka.actor.ActorLogging {
   import context._
 
 //  private[this] var tg = tg1
@@ -303,7 +317,8 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor {
   private[this] var statev = "waiting"
   var task_input: String = ""
   var task_output: String = ""
-  println(s"$tiid Task initializing")
+  log.info(s"$tiid Task initializing")
+  tg.display(tiid)
 
 
 val cancellable =
@@ -321,7 +336,7 @@ val cancellable =
        else {
 	  strout = ""
        }
-      println(s"strout: $strout")
+//      println(s"strout: $strout")
 	  strout
 	}
   
@@ -335,7 +350,7 @@ val cancellable =
   def executeProcess(cmd: String, inp: String): String = {
      var txt: String = ""
      var err_txt: String = ""
-	 println(s"execute command: $cmd")
+	 log.info(s"execute command: $cmd")
      val calcProc = cmd.run(new ProcessIO(
       // Handle subprocess's stdin
       // (which we write via an OutputStream)
@@ -364,7 +379,7 @@ val cancellable =
 
     val code = calcProc.exitValue()
 	if (code != 0) {
-  	  println(s"error:$cmd:$code:$err_txt: $txt")
+  	  log.info(s"error:$cmd:$code:$err_txt: $txt")
 	  throw new Exception(txt)
 	}
 	txt
@@ -372,27 +387,27 @@ val cancellable =
 
   def receive = {
    case "tock" =>
-     println(s"$tiid: rcvd tock")
+     log.info(s"$tiid: rcvd tock")
      tg.display(tiid)
    case "init" =>
-      println(s"$tiid init")
-      println(self_id)
+      log.info(s"$tiid init")
+      log.info(self_id)
 	case map:Map[String, String] =>
 //	  println(s"$tiid: map:::",map)
 	  var input_stream = extractJson(map("output"))
-      println(s"cum input before $task_input")
-	  println(s"input before $input_stream")
+//      println(s"cum input before $task_input")
+//	  println(s"input before $input_stream")
 	  task_input += input_stream						// concatenate all pred task output
-	  println(s"cum after $task_input")
+//	  println(s"cum after $task_input")
 	  var from = sender.path.name
-	  println(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
+	  log.info(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
 	  if (tg.set_running(tiid)) {
 	      input_stream = wrapJson(task_input)
-	      println(s"$tiid: task running")
+	      log.info(s"$tiid: task running")
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
 //		  println(s"service: $svc_call")
-		  println(s"$tiid: input: $input_stream")
+//		  println(s"$tiid: input: $input_stream")
           try { 
              task_output = executeProcess(svc_call, input_stream)
              successful = true
@@ -400,17 +415,17 @@ val cancellable =
           } catch {
             case ex: Exception => 
 			    task_output = "error"
-				println("upper exception")
+				log.info(s"$tiid: task failed")
                 tg.taskError(tiid, ex.getStackTraceString)
           }
           if (successful) {
               val send_list = tg.set_complete(tiid)
-              println("send list: ",send_list)
+              log.info("send list: ",send_list)
               send_list.foreach(x => 
               { 
                 if (x > 0) {
                   val thePath = "/user/job0/"+tg.TaskInstanceName(x)
-                  println(s"$self_id: send start to $x:$thePath")
+                  log.info(s"$self_id: send start to $x:$thePath")
                   context.actorSelection("../*") ! Map("function"->"start","output"->task_output)
                 } 
               })
