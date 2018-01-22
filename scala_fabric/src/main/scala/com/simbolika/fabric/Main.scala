@@ -24,8 +24,9 @@ import scala.concurrent.duration._
 class TaskGraph() {
 }
 
-class NeoTaskGraph(job: String) extends TaskGraph {
-
+class NeoTaskGraph(job_text: String) extends TaskGraph {
+  val JOB_DATA_SEP = "!!"
+  var job_data = ""
   val system = ActorSystem("sentient_fabric")
   val log = system.log
   val driver = GraphDatabase.driver("bolt://localhost/7687")
@@ -69,17 +70,37 @@ class NeoTaskGraph(job: String) extends TaskGraph {
 	  return driver.session
 	} 
   }
+  def getJobData(): String = {
+    if (job_data == "") {
+      return ""
+    }
+    job_data.replace("{","").replace("}","")+","
+  }
   def createJobInstanceNode(): Int = {
+    var arguments = ""
+    var job = ""
+    tg_log(s"creating ji: $job_text, $JOB_DATA_SEP")
+    if (job_text contains JOB_DATA_SEP) {
+      val data_lst = job_text.split(JOB_DATA_SEP)
+      println(data_lst.mkString(","))
+      job = data_lst(0)
+      arguments = data_lst(1)
+      job_data = arguments
+    }
+    else {
+      job = job_text
+      arguments = ""
+    }
     if (job contains "CREATE") {
 	  tg_log(s"CREATE: $job")
       val result = session.run(job)
       val job_id = result.next().get("job_instance").asInt()
 	  tg_log(s"new job: $job_id")
-      val result1 = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
+      val result1 = session.run(s"MATCH (j:Job) where id(j)= $job_id  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp, ji_data: '$arguments'}) RETURN id(ji) AS job_instance")  
       return result1.next().get("job_instance").asInt()
 	}
 	tg_log(s"lookup job by name: $job")
-	val cypher = s"MATCH (j:Job) where j.name= '$job'  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance"
+	val cypher = s"MATCH (j:Job) where j.name= '$job'  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp, ji_data: '$arguments'}) RETURN id(ji) AS job_instance"
     tg_log(s"create ji: $cypher")
     val result2 = session.run(cypher)  
     return result2.next().get("job_instance").asInt()
@@ -100,13 +121,13 @@ class NeoTaskGraph(job: String) extends TaskGraph {
     return -1
   }
   def valid_job(): Boolean = {
-    val result = session.run(s"MATCH (j:Job) WHERE id(j) = $job RETURN j.name AS job")
+    val result = session.run(s"MATCH (j:Job) WHERE id(j) = $job_id RETURN j.name AS job")
     if (result.hasNext()) {
       val record = result.next()
       tg_log(record.get("job").asString())
       return true
     }
-    tg_log(s"$job not valid")
+    tg_log(s"$job_id not valid")
     false
   }
   def format_service(tiid: Int): String = {
@@ -321,7 +342,7 @@ class TaskInstance(tiid: Int, tg: NeoTaskGraph) extends Actor with akka.actor.Ac
   var task_input: String = ""
   var task_output: String = ""
   log.info(s"$tiid Task initializing")
-  tg.display(tiid)
+//  tg.display(tiid)
 
 
 val cancellable =
@@ -344,6 +365,7 @@ val cancellable =
 	}
   
   def wrapJson(inp: String): String = {
+    log.info(s"wrapping input: $inp")
     if (inp != "null") {
       return "<app_data>{"+inp+"\"_terminator\":\"null\"}</app_data>"
 	}
@@ -406,6 +428,7 @@ val cancellable =
 	txt
   }
 
+
   def receive = {
    case "tock" =>
      log.info(s"$tiid: rcvd tock")
@@ -423,7 +446,7 @@ val cancellable =
 	  var from = sender.path.name
 	  log.info(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
 	  if (tg.set_running(tiid)) {
-	      input_stream = wrapJson(task_input)
+	      input_stream = wrapJson(task_input+tg.getJobData())
 	      log.info(s"$tiid: task running")
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
