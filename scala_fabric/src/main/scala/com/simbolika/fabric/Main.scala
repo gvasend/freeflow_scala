@@ -79,7 +79,9 @@ class NeoTaskGraph(job: String) extends TaskGraph {
       return result1.next().get("job_instance").asInt()
 	}
 	tg_log(s"lookup job by name: $job")
-    val result2 = session.run(s"MATCH (j:Job) where j.name= '$job'  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance")  
+	val cypher = s"MATCH (j:Job) where j.name= '$job'  MERGE (j)-[r:HAS_JOBINSTANCE]->(ji:JobInstance {name: j.name+' instance', timestamp: $timestamp}) RETURN id(ji) AS job_instance"
+    tg_log(s"create ji: $cypher")
+    val result2 = session.run(cypher)  
     return result2.next().get("job_instance").asInt()
   }
   def set_self(self_name: String) = {
