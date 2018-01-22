@@ -355,7 +355,7 @@ val cancellable =
   if (line contains "create_job") {
    var lst = line.split("::")
    var cypher = lst(1)
-   println("execute ",cypher)
+   println(s"execute ($cypher)")
    var job: ActorRef = system.actorOf(Props(new JobInstance(cypher)), "job2")
  
   }
