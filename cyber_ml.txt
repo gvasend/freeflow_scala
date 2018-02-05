@@ -1,0 +1,9 @@
+CREATE (job:Job {name:"cyber_ml1", input_corpus:"all_logs.log", tws:60.0, max_window:1000, n_features:1000 }), 
+    (job)<-[:Parent]-(fe:Task { name:'FE', endPoint:'$ff_home/log_fea.py --corpus *input_corpus --tws 60.0 --sliding_window ' }),
+    (job)<-[:Parent]-(vector:Task { name: 'vector', endPoint:'$ff_home/sk_vectorizer.py ' }),
+    (job)<-[:Parent]-(hdbscan: Task { name: 'hdbscan', endPoint:'$ff_home/sk_hdbscan.py' }),
+    (job)<-[:Parent]-(fit_predict: Task {name: 'fit_predict', endPoint:'$ff_home/sk_model.py --action fit_predict '}),
+    (job)<-[:Parent]-(plot: Task {name: 'plot', endPoint:'$ff_home/sk_plot.py --title "${job.title}" --type basic --plot save --feature_file "*feature_file" '}),
+    (job)<-[:Parent]-(emailit: Task {name: 'email', endPoint:'$ff_home/emailit.py --to "gvasend@gmail.com" --subject "graph" --file_attachment "*svc_plot_file"'}),
+    (fe)-[:succ]->(vector)-[:succ]->(fit_predict)-[:succ]->(plot)-[:succ]->(emailit),
+    (hdbscan)-[:succ]->(fit_predict)
