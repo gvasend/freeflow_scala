@@ -1,3 +1,2 @@
-CREATE (job:Job {name:"input_flow"}), 
-  (job)<-[:Parent]-(task1:Task { name:'step1' }),
-  (task1)-[:uses_service]->(service1:Service {endPoint:'$ff_home/udp_rcvr.py'}) return id(job) as job_instance
+CREATE (job:Job {name:"udp_input_flow"}), 
+  (job)<-[:Parent]-(task1:Task { name:'step1', endPoint:'$ff_home/udp_rcvr.py' }) return id(job) as job_instance

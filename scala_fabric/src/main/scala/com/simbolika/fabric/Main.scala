@@ -25,6 +25,7 @@ class TaskGraph() {
 }
 
 class NeoTaskGraph(job_text: String) extends TaskGraph {
+  var sessions = scala.collection.mutable.Map[Int, org.neo4j.driver.v1.Session]()
   val JOB_DATA_SEP = "!!"
   var job_data = ""
   val system = ActorSystem("sentient_fabric")
@@ -36,7 +37,6 @@ class NeoTaskGraph(job_text: String) extends TaskGraph {
 //  val valid = valid_job()
   val jin = createJobInstanceNode()
   createTaskInstanceNode()
-  var sessions = scala.collection.mutable.Map[Int, org.neo4j.driver.v1.Session]()
   private var statev = "waiting"
   private var self_id: String = "step"
   set_state("waiting")
@@ -62,6 +62,7 @@ class NeoTaskGraph(job_text: String) extends TaskGraph {
       val result = session.run(s"MATCH (ti:TaskInstance) WHERE id(ti) = $tiid SET ti.state='failed', ti.fail_message='$message'")  
   }
   def taskSession(tiid: Int): org.neo4j.driver.v1.Session = {
+    tg_log(s"retrieve session for task $tiid")
     if (sessions.contains(tiid)) {
 	  return sessions(tiid)
 	} else {
@@ -132,7 +133,7 @@ class NeoTaskGraph(job_text: String) extends TaskGraph {
   }
   def format_service(tiid: Int): String = {
     println(s"format_service: $tiid")
-    val result = taskSession(tiid).run(s"MATCH (ti:TaskInstance)-[]-(t:Task)-[]->(s:Service) WHERE id(ti) = $tiid RETURN id(s) as svc_id, s.endPoint AS endpoint")
+    val result = taskSession(tiid).run(s"MATCH (ti:TaskInstance)-[]-(t:Task) WHERE id(ti) = $tiid RETURN id(t) as svc_id, t.endPoint AS endpoint")
     if (result.hasNext()) {
       val record = result.next()
       var endpt = record.get("endpoint").asString()
@@ -147,7 +148,11 @@ class NeoTaskGraph(job_text: String) extends TaskGraph {
 		tg_log(s"proccessing parameter: $name $value")
          endpt += " --"+name+" "+value
       }
-      return endpt
+      val fname = ConfigFactory.load().getString("ff.job")
+      val ff_home =  ConfigFactory.load().getString("ff.ff_home")
+      log.info("cypher: $fname")
+      val endpt_final = endpt.replace("$ff_home",ff_home)
+      return endpt_final
     }
     "none"
   }
@@ -312,6 +317,30 @@ val cancellable =
 }
 
 
+class Experiment(exp_data: String) extends Actor with akka.actor.ActorLogging {
+
+// name::{<a;b;c>}
+
+  import context._
+  val name = self.path.name
+  log.info(s"$name create Experiment data=$exp_data")
+//  log.info(tg.task_list())
+
+   val uuid = java.util.UUID.randomUUID.toString  
+   var jname = exp_data
+   var job: ActorRef = system.actorOf(Props(new JobInstance(jname)), "job"+uuid)
+  
+  system.scheduler.scheduleOnce(5.seconds) {
+      println(s"$name: Experiment heartbeat!")
+  }
+
+  def receive = {
+    case "tick" => 
+      println(s"$name: Experiment heartbeat!!")
+  }
+  
+}
+
 class JobInstance(task_graph: String) extends Actor with akka.actor.ActorLogging {
 
   import context._
@@ -371,24 +400,37 @@ val cancellable =
 	}
 	return inp
   }
+
+// receive and execute asynchronous command from process if present
   
   def processLine(line: String): String = {
   println("rcvd:",line)
+  val uuid = java.util.UUID.randomUUID.toString
   if (line contains "create_job") {
    var lst = line.split("::")
    var cypher = lst(1)
    println(s"execute ($cypher)")
-   var job: ActorRef = system.actorOf(Props(new JobInstance(cypher)), "job2")
+   var job: ActorRef = system.actorOf(Props(new JobInstance(cypher)), "job-"+uuid)
  
+  }
+  else if (line contains "create_experiment") {
+   var lst = line.split("::")
+   var jname = lst(1)
+   var job: ActorRef = system.actorOf(Props(new Experiment(jname)), "exp-"+uuid)
   }
   else if (line contains "run_job") {
    var lst = line.split("::")
    var jname = lst(1)
-   var job: ActorRef = system.actorOf(Props(new JobInstance(jname)), "job2")
+   var job: ActorRef = system.actorOf(Props(new JobInstance(jname)), "job-"+uuid)
   }
   else if (line contains "rcv_data") {}
-  line
+  line    // return received text 
 }
+
+  def subVars(inp: String): String = {
+    val ff_home =  ConfigFactory.load().getString("ff.ff_home")
+    inp.replace("$ff_home",ff_home)
+  }
 	
   def executeProcess(cmd: String, inp: String): String = {
      var txt: String = ""
@@ -412,8 +454,15 @@ val cancellable =
         src.close()
       },
       // We don't want to use stderr, so just close it
-      stderr => { err_txt = scala.io.Source.fromInputStream(stderr).mkString
-                  stderr.close() }
+//      stderr => { err_txt = scala.io.Source.fromInputStream(stderr).mkString
+ //                 stderr.close() }
+      stderr => {
+        val err = scala.io.Source.fromInputStream(stderr)
+        for (line <- err.getLines()) {
+		  println(line)
+        }
+        err.close()  
+        }
     ))
 
     // Using ProcessBuilder.run() will automatically launch
@@ -446,12 +495,12 @@ val cancellable =
 	  var from = sender.path.name
 	  log.info(s"$self_id: start received by $self_id from $from, state = $statev", input_stream)
 	  if (tg.set_running(tiid)) {
-	      input_stream = wrapJson(task_input+tg.getJobData())
+	      input_stream = subVars(wrapJson(task_input+tg.getJobData()))
 	      log.info(s"$tiid: task running")
 	      val svc_call = tg.format_service(tiid)
           var successful: Boolean = false	      
 //		  println(s"service: $svc_call")
-//		  println(s"$tiid: input: $input_stream")
+		  println(s"$tiid: input: $input_stream")
           try { 
              task_output = executeProcess(svc_call, input_stream)
              successful = true
