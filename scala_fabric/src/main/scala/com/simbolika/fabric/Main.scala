@@ -266,7 +266,7 @@ class NeoTaskGraph(job_text: String) extends TaskGraph {
   def ready(self_name: String) = { 
   } 
   def tg_log(txt: String) = {
-     log.info(txt)
+//     log.info(txt)
   }
 }
 
@@ -356,7 +356,7 @@ class JobInstance(task_graph: String) extends Actor with akka.actor.ActorLogging
 
   def receive = {
     case "tick" => 
-      println(s"$name: Job heartbeat!!")
+//      println(s"$name: Job heartbeat!!")
   }
   
 }
@@ -480,7 +480,7 @@ val cancellable =
 
   def receive = {
    case "tock" =>
-     log.info(s"$tiid: rcvd tock")
+//     log.info(s"$tiid: rcvd tock")
      tg.display(tiid)
    case "init" =>
       log.info(s"$tiid init")
